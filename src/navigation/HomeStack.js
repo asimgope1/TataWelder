@@ -4,52 +4,51 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import DashBoard from '../Pages/DashBoard/DashBoard';
 import Registration from '../Pages/Registratration/Registration';
-import { BRAND, WHITE } from '../constants/color';
+import NewJob from '../Pages/NewJob/NewJob';
+import JobApproval from '../Pages/JobApproval/JobApproval';
+import RTReport from '../Pages/RTReport/RTReport';
+import PAUTReport from '../Pages/PAUTReport/PAUTReport';
+import QualityVerification from '../Pages/QualityVerification\'/QualityVerification';
+import TPI from '../Pages/TPI/TPI';
+import FinalApproval from '../Pages/FinalApproval/FinalApproval';
+import CustomDrawerContent from './CustomDrawerContent';
 import { WIDTH } from '../constants/config';
 
-// Create instances of StackNavigator and DrawerNavigator
+
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-// Define the DrawerNavigator with DashBoard as the only screen
 const DrawerNavigator = () => {
   return (
     <Drawer.Navigator
       initialRouteName="DashBoard"
       screenOptions={{
-        headerShown: false, // Hide headers for screens inside the drawer
-        drawerStyle: {
-          backgroundColor: WHITE, // Customize drawer background color
-          width: WIDTH * 0.6, // Set the drawer width
-        },
+        headerShown: false,
+        drawerWidth: WIDTH,
       }}
+      drawerContent={(props) => <CustomDrawerContent {...props} />} // Use custom drawer here
     >
-      <Drawer.Screen
-        name="DashBoard"
-        component={DashBoard}
-        options={{ drawerLabel: 'Dashboard' }} // Customize the drawer label
-      />
-
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Registration"
-        component={Registration}
-      />
+      <Drawer.Screen name="DashBoard" component={DashBoard} />
+      <Drawer.Screen name="Registration" component={Registration} />
+      <Drawer.Screen name="New Job" component={NewJob} />
+      <Drawer.Screen name="Job Approval" component={JobApproval} />
+      <Drawer.Screen name="RT Report" component={RTReport} />
+      <Drawer.Screen name="PAUT-Report" component={PAUTReport} />
+      <Drawer.Screen name="Quality Verification" component={QualityVerification} />
+      <Drawer.Screen name="TPI" component={TPI} />
+      <Drawer.Screen name="Final Approval" component={FinalApproval} />
     </Drawer.Navigator>
   );
 };
 
-// Main component that includes only the DrawerNavigator for DashBoard
 const HomeStack = () => {
   return (
-    <NavigationContainer
-      independent={true}
-    >
+    <NavigationContainer independent={true}>
       <Stack.Navigator initialRouteName="Drawer">
         <Stack.Screen
           name="Drawer"
-          component={DrawerNavigator} // Embed the DrawerNavigator here
-          options={{ headerShown: false }} // Hide the header for the stack
+          component={DrawerNavigator}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -104,7 +104,10 @@ const DashBoard = ({ navigation }) => {
 
                         <>
                             <Header
-                                onMenuPress={() => navigation.toggleDrawer()}
+                                onMenuPress={() => {
+                                    navigation.toggleDrawer()
+                                    console.log('navigation', navigation)
+                                }}
                                 title="Welder Jobs"
                             />
 

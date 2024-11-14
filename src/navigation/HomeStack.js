@@ -24,7 +24,9 @@ const DrawerNavigator = () => {
       initialRouteName="DashBoard"
       screenOptions={{
         headerShown: false,
-        drawerWidth: WIDTH,
+        drawerStyle: {
+          width: WIDTH, // Make drawer take full screen width
+        },
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />} // Use custom drawer here
     >

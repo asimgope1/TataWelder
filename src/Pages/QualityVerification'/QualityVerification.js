@@ -1,11 +1,44 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native'
+import React, { Fragment } from 'react'
+import { BRAND, RED } from '../../constants/color'
+import Header from '../../components/Header'
+import { MyStatusBar } from '../../constants/config'
+import { appStyles } from '../../styles/AppStyles'
 
-const QualityVerification = () => {
+const QualityVerification = ({ navigation }) => {
     return (
-        <View>
-            <Text>QualityVerification</Text>
-        </View>
+        <Fragment>
+            <MyStatusBar backgroundColor={BRAND} barStyle={'light-content'} />
+            <SafeAreaView style={appStyles.safeareacontainer}>
+                {/* <Loader visible={loader} /> */}
+
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1 }}>
+
+                    <ScrollView
+                        keyboardShouldPersistTaps={'handled'}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{
+                            flexGrow: 1,
+                            alignItems: 'center',
+                            paddingBottom: 20, // Adjust padding bottom to ensure space for scrolling
+                        }}>
+
+
+                        <>
+                            <Header
+                                onMenuPress={() => {
+                                    navigation.toggleDrawer()
+                                    console.log('navigation', navigation)
+                                }}
+                                title="Quality-Verification"
+                            />
+                        </>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </Fragment>
     )
 }
 

@@ -303,7 +303,17 @@ export const styles = StyleSheet.create({
         elevation: 3,  // for Android shadow
     },
     cardContent: {
-        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        marginBottom: 10,
+        // elevation: 3, // for Android shadow
+        shadowColor: '#000', // for iOS shadow
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
     },
     cardHeader: {
         marginBottom: 8,

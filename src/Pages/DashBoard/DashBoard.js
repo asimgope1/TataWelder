@@ -77,26 +77,7 @@ const DashBoard = ({ navigation }) => {
         );
     };
 
-    const WelderData = [
-        { type: "credit", description: "Salary", amount: 2000 },
-        { type: "debit", description: "Groceries", amount: 150 },
-        { type: "credit", description: "Freelance", amount: 500 },
-        { type: "debit", description: "Utility Bill", amount: 120 },
-        { type: "credit", description: "Bonus", amount: 700 },
-        { type: "debit", description: "Restaurant", amount: 80 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-        { type: "credit", description: "Investment", amount: 300 },
-    ];
+
 
     return (
         <Fragment>

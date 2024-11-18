@@ -27,10 +27,11 @@ const colors = [
 
 // Menu items
 const menuItems = [
-    { name: 'DashBoard', icon: 'dashboard', label: 'Dashboard' },
     { name: 'Registration', icon: 'receipt', label: 'Registration' },
     { name: 'New Job', icon: 'new-label', label: 'New Job' },
     { name: 'Job Approval', icon: 'thumb-up', label: 'Job Approval' },
+    { name: 'Assign Welder', icon: 'work', label: 'Assign Welder' },
+
     { name: 'RT Report', icon: 'menu-book', label: 'RT Report' },
     { name: 'PAUT-Report', icon: 'menu-book', label: 'PAUT Report' },
     { name: 'Quality Verification', icon: 'check-circle-outline', label: 'Q-Verification' },

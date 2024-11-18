@@ -13,6 +13,7 @@ import TPI from '../Pages/TPI/TPI';
 import FinalApproval from '../Pages/FinalApproval/FinalApproval';
 import CustomDrawerContent from './CustomDrawerContent';
 import { WIDTH } from '../constants/config';
+import AssignWelder from '../Pages/AssignWelder/AssignWelder';
 
 
 const Stack = createNativeStackNavigator();
@@ -31,6 +32,7 @@ const DrawerNavigator = () => {
       drawerContent={(props) => <CustomDrawerContent {...props} />} // Use custom drawer here
     >
       <Drawer.Screen name="DashBoard" component={DashBoard} />
+      <Drawer.Screen name="Assign Welder" component={AssignWelder} />
       <Drawer.Screen name="Registration" component={Registration} />
       <Drawer.Screen name="New Job" component={NewJob} />
       <Drawer.Screen name="Job Approval" component={JobApproval} />

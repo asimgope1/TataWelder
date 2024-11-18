@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { BLACK, WHITE } from "../constants/color";
+import { BLACK, BRAND, GRAY, WHITE } from "../constants/color";
 import { HEIGHT, WIDTH } from "../constants/config";
 export const appStyles = StyleSheet.create({
   safeareacontainer: {
@@ -34,5 +34,48 @@ export const appStyles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "space-between",
     // backgroundColor: "red",
+  },
+  dateSection: {
+    marginVertical: 10,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    color: GRAY,
+  },
+  dropdown: {
+    backgroundColor: WHITE,
+    // width: '30%',
+    borderWidth: 1,
+    borderColor: GRAY,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 15,
+  },
+  dropdownStyle: {
+    backgroundColor: WHITE,
+    borderWidth: 1,
+    borderColor: GRAY,
+  },
+  checkboxContainer: {
+    marginVertical: 20,
+    width: '100%',
+    alignItems: 'flex-start',
+  },
+  checkbox: {
+    marginBottom: 10,
+  },
+  submitButton: {
+    backgroundColor: BRAND,
+    width: '100%',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: 18,
+    color: WHITE,
   },
 });

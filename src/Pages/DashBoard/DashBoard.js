@@ -1,5 +1,5 @@
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { HEIGHT, MyStatusBar, WIDTH } from '../../constants/config';
 import { BLACK, BRAND, GRAY, WHITE } from '../../constants/color';
 import { appStyles } from '../../styles/AppStyles';
@@ -12,8 +12,39 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { FlatList } from 'react-native-gesture-handler';
 import Header from '../../components/Header';
 import { Icon } from 'react-native-elements';
+import { BAS_URL, BASE_URL } from '../../constants/url';
+import { GETNETWORK } from '../../utils/Network';
 
 const DashBoard = ({ navigation }) => {
+
+
+    const [JobList, SetJobList] = React.useState([]);
+
+
+    useEffect(() => {
+        GetJobList();
+    }, [])
+
+
+
+
+    const GetJobList = () => {
+        const url = `${BAS_URL}welding/jobmaster/joblist/`;
+        GETNETWORK(url, true).then(
+            (response) => {
+                if (response.status === 'success') {
+                    console.log(response.data)
+
+                    SetJobList(response.data)
+                }
+                else {
+                    console.log('Error:', response.message);
+                }
+            },
+        )
+
+
+    }
     const renderItem = ({ item }) => {
         const today = new Date().toLocaleDateString();
         const isCredit = item.type === "credit";
@@ -25,8 +56,8 @@ const DashBoard = ({ navigation }) => {
                 <View style={styles.cardContent}>
                     {/* Left: Icon */}
                     <Icon
-                        name={isCredit ? 'arrow-up-circle' : 'arrow-down-circle'}
-                        type='feather'
+                        name={'task'}
+                        type='material'
                         color={isCredit ? 'green' : 'red'}
                         size={24}
                         containerStyle={{ marginRight: 10 }}
@@ -34,18 +65,13 @@ const DashBoard = ({ navigation }) => {
 
                     {/* Center: Description */}
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.cardTitle}>{item.description}</Text>
-                        <Text style={styles.cardDate}>{today}</Text>
+                        <Text style={styles.cardTitle}>Job Number -</Text>
+                        <Text style={styles.cardTitle}>Job Desc -{item.job_desc_number}</Text>
+                        <Text style={styles.cardDate}>Job Date : {item.job_offer_date}</Text>
+                        <Text style={styles.cardDate}>Unit Number : {item.unit_number}</Text>
                     </View>
 
-                    {/* Right: Amount */}
-                    <Text style={{
-                        color: isCredit ? 'green' : 'red',
-                        fontWeight: 'bold',
-                        fontSize: 16
-                    }}>
-                        {isCredit ? '+' : '-'} ${item.amount}
-                    </Text>
+
                 </View>
             </TouchableOpacity>
         );
@@ -177,7 +203,7 @@ const DashBoard = ({ navigation }) => {
                                 zIndex: 1000,
                             }}>
                             <FlatList
-                                data={WelderData}
+                                data={JobList}
                                 renderItem={renderItem}
                                 keyExtractor={(item, index) => index.toString()}
                                 contentContainerStyle={{

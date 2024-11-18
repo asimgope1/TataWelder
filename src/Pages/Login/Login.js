@@ -33,6 +33,8 @@ import { BG, LOGO, TATA } from '../../constants/imagepath';
 import { Card, Icon, Input } from 'react-native-elements';
 import LinearGradient from 'react-native-linear-gradient';
 import { Switch, TextInput } from 'react-native-paper';
+import { checkuserToken } from '../../redux/actions/auth';
+import { useDispatch } from 'react-redux';
 
 const Login = ({ navigation, route }) => {
   const [loader, setLoader] = useState(false);
@@ -41,6 +43,7 @@ const Login = ({ navigation, route }) => {
   const [alertMsg, setAlertMsg] = useState('');
   const [alertModal, setAlertModal] = useState(false);
   const [exitModal, setExitModal] = useState(false);
+  const dispatch = useDispatch()
 
   const [isSwitchOn, setIsSwitchOn] = React.useState(false);
 
@@ -54,23 +57,40 @@ const Login = ({ navigation, route }) => {
     return unsubscribe;
   }, [navigation]);
 
+
   const handleLogin = () => {
-    const url = `${BASE_URL}login/`;
-    const obj = { email, password };
+    const url = `${BASE_URL}auth/`;
+    const obj = {
+      "username": email,
+      "password": password
+    };
+
     setLoader(true);
-    POSTNETWORK(url, obj)
+
+    // Prepare the headers
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    // Prepare the request options
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(obj),
+      redirect: "follow"
+    };
+
+    // Use fetch instead of POSTNETWORK
+    fetch(url, requestOptions)
+      .then(response => response.json())
       .then(res => {
-        if (res.code === 200) {
+        console.log('response', res);
+        if (res?.token) {
           storeObjByKey('loginResponse', res).then(() => {
-            if (res?.data?.is_admin) {
-              navigation.navigate('Admin');
-            } else {
-              navigation.navigate('Terms');
-            }
+            // navigation.navigate('DashBoard');
+            dispatch(checkuserToken());
+
           });
         } else {
-          setAlertMsg(res?.msg);
-          setAlertModal(true);
         }
       })
       .catch(() => {
@@ -80,6 +100,7 @@ const Login = ({ navigation, route }) => {
         setLoader(false);
       });
   };
+
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -278,7 +299,7 @@ const Login = ({ navigation, route }) => {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => login()}
+                  onPress={() => handleLogin()}
                   style={{
                     width: WIDTH * 0.9,
                     height: HEIGHT * 0.065,
@@ -328,7 +349,9 @@ const Login = ({ navigation, route }) => {
             </ScrollView>
           </ImageBackground>
 
-          {loader && <Loader />}
+          {loader && <Loader
+            visible={loader}
+          />}
         </KeyboardAvoidingView>
       </SafeAreaView>
 

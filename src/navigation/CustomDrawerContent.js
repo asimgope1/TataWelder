@@ -8,6 +8,9 @@ import { HEIGHT, WIDTH } from '../constants/config';
 import { BOLD, REGULAR, SEMIBOLD } from '../constants/fontfamily';
 import Header from '../components/Header';
 import { RFValue } from 'react-native-responsive-fontsize';
+import { clearAll } from '../utils/Storage';
+import { checkuserToken } from '../redux/actions/auth';
+import { useDispatch } from 'react-redux';
 
 // Define a larger set of colors for unique coloring of each item
 const colors = [
@@ -35,8 +38,10 @@ const menuItems = [
     { name: 'Final Approval', icon: 'thumbs-up-down', label: 'Final Approval' },
 ];
 
+
 const CustomDrawerContent = (props) => {
     const { navigation } = props;  // Get the navigation prop from the drawer
+    const dispatch = useDispatch()
 
     return (
         <DrawerContentScrollView
@@ -126,7 +131,10 @@ const CustomDrawerContent = (props) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.navigationButton, styles.logoutButton]}
-                    onPress={() => navigation.navigate('Login')} // Navigate to Login screen
+                    onPress={() => {
+                        clearAll()
+                        dispatch(checkuserToken(false))
+                    }} // Navigate to Login screen
                 >
                     <Text style={styles.navigationButtonText}>Logout</Text>
                 </TouchableOpacity>

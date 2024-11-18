@@ -125,7 +125,7 @@ export const styles = StyleSheet.create({
         width: '99%'
     },
     cardTitle: {
-        fontSize: RFValue(16),
+        fontSize: RFValue(13),
         color: BLACK,
         fontFamily: EXTRABOLD,
     },
@@ -291,6 +291,8 @@ export const styles = StyleSheet.create({
     },
     cardContainer: {
         width: '90%',
+        height: HEIGHT * 0.16,
+        padding: 10,
 
         backgroundColor: '#fff',
         borderRadius: 10,
@@ -318,11 +320,7 @@ export const styles = StyleSheet.create({
     cardHeader: {
         marginBottom: 8,
     },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-    },
+
     cardSubTitle: {
         fontSize: 14,
         color: '#666',

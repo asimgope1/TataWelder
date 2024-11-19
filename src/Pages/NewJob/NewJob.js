@@ -10,15 +10,18 @@ import {
     Alert,
     ActivityIndicator,
     StyleSheet,
+    TextInput,
+    Modal,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { BRAND, WHITE, GRAY } from '../../constants/color';
 import Header from '../../components/Header';
-import { MyStatusBar, WIDTH } from '../../constants/config';
+import { HEIGHT, MyStatusBar, WIDTH } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
-import { POSTNETWORK } from '../../utils/Network';
+import { GETNETWORK, POSTNETWORK } from '../../utils/Network';
 import { BAS_URL } from '../../constants/url';
 import { CheckBox } from 'react-native-elements';
+import { Calendar } from 'react-native-calendars';
 
 const NewJob = ({ navigation }) => {
     const [formData, setFormData] = useState({
@@ -33,57 +36,85 @@ const NewJob = ({ navigation }) => {
         joint_number: '',
         rt_required: false,
         paut_required: false,
+        job_details: "",
+        tube_joints: '',
+        job_desc_number: "",
         date: new Date().toLocaleDateString(),
     });
+    const [startDate, setStartDate] = useState(new Date().toLocaleDateString());
+    const [endDate, setEndDate] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+
+    const handleDateSelect = day => {
+        setStartDate(day.dateString);
+
+        setFormData(prevState => ({
+            ...prevState,
+            date: day.dateString, // Sets the current date
+        }));
+
+        setShowModal(false);
+    };
 
     const [loading, setLoading] = useState(true);
-    const [unitItems, setUnitItems] = useState([]);
-    const [componentItems, setComponentItems] = useState([]);
-    const [areaItems, setAreaItems] = useState([]);
-    const [hangerItems, setHangerItems] = useState([]);
-    const [coilItems, setCoilItems] = useState([]);
-    const [panelItems, setPanelItems] = useState([]);
-    const [rowItems, setRowItems] = useState([]);
-    const [tubeItems, setTubeItems] = useState([]);
-    const [jointItems, setJointItems] = useState([]);
 
+    const [unitItems, setUnitItems] = useState([]);
     const [dropdownStates, setDropdownStates] = useState({
         unitOpen: false,
+    });
+    const [componentItems, setcomponentItems] = useState([]);
+    const [componentStates, setcomponentStates] = useState({
         componentOpen: false,
+    });
+
+    const [areaItems, setAreaItems] = useState([]);
+    const [areaStates, setAreaStates] = useState({
         areaOpen: false,
+    });
+    const [hangerItems, setHangerItems] = useState([]);
+    const [hangerStates, setHangerStates] = useState({
         hangerOpen: false,
+    });
+    const [coilItems, setCoilItems] = useState([]);
+    const [coilStates, setCoilStates] = useState({
         coilOpen: false,
+    });
+    const [panelItems, setPanelItems] = useState([]);
+    const [panelStates, setPanelStates] = useState({
         panelOpen: false,
+    });
+    const [rowItems, setRowItems] = useState([]);
+    const [rowStates, setRowStates] = useState({
         rowOpen: false,
+    });
+    const [tubeItems, setTubeItems] = useState([]);
+    const [tubeStates, setTubeStates] = useState({
         tubeOpen: false,
+    });
+    const [jointItems, setJointItems] = useState([]);
+    const [jointStates, setJointStates] = useState({
         jointOpen: false,
     });
 
     useEffect(() => {
         const fetchDropdownData = async () => {
             try {
-                const myHeaders = new Headers();
-                myHeaders.append("Authorization", "Token cf78dfb39e185f7d1951dd55bf6897cff95d1ab6");
+                const response = await GETNETWORK(
+                    `${BAS_URL}welding/jobmaster/create-job/`,
+                    true,
+                );
 
-                const requestOptions = {
-                    method: "GET",
-                    headers: myHeaders,
-                    redirect: "follow",
-                };
-
-                const response = await fetch("http://192.168.0.111:8000/welding/jobmaster/create-job/?component_name=Component-1&area=24&hanger_number=12&coil_number=12&panel_number=23&row_number=45&tube_number=32", requestOptions);
-                const data = await response.json();
-
-                if (data.status === "success") {
-                    setUnitItems(data.data.unit_numbers.map(item => ({ label: item, value: item })));
-                    setComponentItems(data.data.component_names.map(item => ({ label: item, value: item })));
-                    setAreaItems(data.data.areas.map(item => ({ label: item, value: item })));
-                    setHangerItems(data.data.hanger_numbers.map(item => ({ label: item, value: item })));
-                    setCoilItems(data.data.coil_numbers.map(item => ({ label: item, value: item })));
-                    setPanelItems(data.data.panel_numbers.map(item => ({ label: item, value: item })));
-                    setRowItems(data.data.row_numbers.map(item => ({ label: item, value: item })));
-                    setTubeItems(data.data.tube_numbers.map(item => ({ label: item, value: item })));
-                    setJointItems(data.data.joint_numbers.map(item => ({ label: item, value: item })));
+                if (response.status === 'success') {
+                    setUnitItems(
+                        response.data.unit_number.map(item => ({ label: item, value: item })),
+                    );
+                    setcomponentItems(
+                        response.data.component_name.map(item => ({
+                            label: item,
+                            value: item,
+                        })),
+                    );
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -93,19 +124,26 @@ const NewJob = ({ navigation }) => {
         };
 
         fetchDropdownData();
-    }, []);
+    }, [formData]);
 
     const handleInputChange = (field, value) => {
-        setFormData((prevData) => ({ ...prevData, [field]: value }));
+        setFormData(prevData => ({ ...prevData, [field]: value }));
     };
 
     const handleSubmit = async () => {
+        console.log('form submit', formData)
         const url = `${BAS_URL}welding/jobmaster/create-job/`;
-
         const response = await POSTNETWORK(url, formData, true, false);
 
         if (response && response.status === 'success') {
             Alert.alert('Success', 'Job created successfully');
+            // setFormData({});
+            // setUnitItems([]);
+            // setcomponentItems([]);
+            // setJointItems([]);
+            // setPanelItems([]);
+            // setJointStates({ jointOpen: false });
+
             navigation.goBack();
         } else {
             Alert.alert('Error', 'Failed to create job');
@@ -114,162 +152,538 @@ const NewJob = ({ navigation }) => {
 
     if (loading) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: WHITE }}>
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: WHITE,
+                }}>
                 <ActivityIndicator size="large" color={BRAND} />
             </View>
         );
     }
 
+
+
+    const areaSelect = async value => {
+        // console.log('value-areaSelect', value);
+
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${formData.component_name}&area=${value}`,
+                true,
+            );
+
+            if (response.status === 'success') {
+                // console.log('for areaSelect', response);
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setCoilItems(
+                    response.data.coil_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                )
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
+
+
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const componentSelect = async value => {
+        // console.log('value-componentSelect', value);
+
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${value}`,
+                true,
+            );
+
+            if (response.status === 'success') {
+                // console.log('for area', response);
+                setAreaItems(
+                    response.data.area.map(item => ({ label: item, value: item })),
+                );
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+
     return (
-        <View style={{ flex: 1, backgroundColor: WHITE }}>
+        <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}> {/* Light gray background */}
             <MyStatusBar backgroundColor={BRAND} barStyle={'light-content'} />
             <SafeAreaView style={appStyles.safeareacontainer}>
-                <Header
-                    onMenuPress={() => navigation.toggleDrawer()}
-                    title="New Job"
-                />
-                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                <Header onMenuPress={() => navigation.toggleDrawer()} title="New Job" />
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1 }}>
                     <ScrollView
                         keyboardShouldPersistTaps={'handled'}
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingBottom: 25, paddingHorizontal: 20 }}
-                    >
-                        <View style={{ flex: 1, width: WIDTH, alignItems: 'center' }}>
-                            <View style={appStyles.dateSection}>
-                                <Text style={appStyles.dateText}>Date: {formData.date}</Text>
+                        contentContainerStyle={{
+                            flexGrow: 1,
+                            paddingBottom: 25,
+                            paddingHorizontal: 20,
+                        }}>
+                        <View style={{ flex: 1, width: WIDTH, alignItems: 'center', alignSelf: 'center', paddingHorizontal: 10, elevation: 10, backgroundColor: WHITE }}>
+
+                            <View
+                                style={{
+                                    flex: 1,
+                                    width: WIDTH * 0.96, // Make sure you have a valid WIDTH value (e.g., `Dimensions.get('window').width`)
+                                    alignItems: 'center',
+                                    alignSelf: 'center',
+                                    paddingHorizontal: 10,
+                                    elevation: 10, // Adds shadow for Android
+                                    backgroundColor: WHITE,
+                                    borderRadius: 10, // Rounded corners for the card
+                                    shadowColor: '#000', // Shadow color
+                                    shadowOffset: { width: 0, height: 5 }, // Shadow offset
+                                    shadowOpacity: 0.2, // Shadow opacity
+                                    shadowRadius: 10, // Shadow spread radius
+                                    marginTop: 5
+
+                                }}
+                            >
+
+
+                                {/* Card Section for Date and Unit */}
+                                <View style={{ ...styles.cardContainer, zIndex: 1100 }}>
+                                    <Text style={styles.sectionTitle}>Job Details</Text>
+                                    <View style={styles.row}>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setShowModal(true);
+                                            }}
+                                            style={styles.inputContainer}>
+                                            <Text style={{ ...styles.dropdownHeader, marginTop: 5 }}>Date</Text>
+                                            <View style={styles.dateContainer}>
+                                                <Text style={appStyles.dateText}>Date: {startDate}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Unit</Text>
+                                            <DropDownPicker
+                                                open={dropdownStates.unitOpen}
+                                                value={formData.unit_number}
+                                                items={unitItems}
+                                                setOpen={open =>
+                                                    setDropdownStates(prevState => ({
+                                                        ...prevState,
+                                                        unitOpen: open,
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('unit_number', value);
+                                                }}
+                                                placeholder="Select Unit"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+
+                                {/* Card Section for Component and Area */}
+                                <View style={{ ...styles.cardContainer, zIndex: 1000 }}>
+                                    <View style={styles.row}>
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Component</Text>
+                                            <DropDownPicker
+                                                open={componentStates.componentOpen}
+                                                value={formData.component_name}
+                                                items={componentItems}
+                                                setOpen={open =>
+                                                    setcomponentStates(prevState => ({
+                                                        ...prevState,
+                                                        componentOpen: open,
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('component_name', value);
+                                                }}
+                                                onSelectItem={item => {
+                                                    componentSelect(item?.value);
+                                                }}
+                                                placeholder="Component"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Area</Text>
+                                            <DropDownPicker
+                                                open={areaStates.areaOpen}
+                                                value={formData.area}
+                                                items={areaItems}
+                                                setOpen={open =>
+                                                    setAreaStates(prevState => ({
+                                                        ...prevState,
+                                                        areaOpen: open,
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('area', value);
+                                                }}
+                                                onSelectItem={item => {
+                                                    areaSelect(item?.value);
+                                                }}
+                                                placeholder="Select Area"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+
+                                {/* Additional Card Sections for Other Fields */}
+                                <View style={{ ...styles.cardContainer, zIndex: 900 }}>
+                                    <View style={styles.row}>
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Hanger Number</Text>
+                                            <DropDownPicker
+                                                open={hangerStates.hangerOpen}
+                                                value={formData.hanger_number}
+                                                items={hangerItems}
+                                                setOpen={open =>
+                                                    setHangerStates(prevState => ({
+                                                        ...prevState,
+                                                        hangerOpen: open,
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('hanger_number', value);
+                                                }}
+                                                placeholder="Hanger Number"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Coil Number</Text>
+                                            <DropDownPicker
+                                                open={coilStates.coilOpen}
+                                                value={formData.coil_number} // Ensure formData.coil_number is a valid value
+                                                items={coilItems} // Ensure coilItems has a structure like [{ label: 'Item 1', value: 'item1' }]
+                                                setOpen={open =>
+                                                    setCoilStates(prevState => ({ ...prevState, coilOpen: open }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('coil_number', value); // Ensure the correct field is updated
+                                                }}
+                                                placeholder="Select Coil Number" // Improved placeholder for clarity
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{ ...styles.cardContainer, zIndex: 800 }}>
+                                    <View style={styles.row}>
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Panel Number</Text>
+                                            <DropDownPicker
+                                                open={panelStates.panelOpen}
+                                                value={formData.panel_number}
+                                                items={panelItems}
+                                                setOpen={open =>
+                                                    setPanelStates(prevState => ({
+                                                        ...prevState,
+                                                        panelOpen: open,
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('panel_number', value);
+                                                }}
+                                                placeholder="Panel Number"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Row Number</Text>
+                                            <DropDownPicker
+                                                open={rowStates.rowOpen}
+                                                value={formData.row_number}
+                                                items={rowItems}
+                                                setOpen={open =>
+                                                    setRowStates(prevState => ({ ...prevState, rowOpen: open }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('row_number', value);
+                                                }}
+                                                placeholder="Row Number"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
+
+
+                                    </View>
+                                </View>
+                                <View style={{ ...styles.cardContainer, zIndex: 700 }}>
+                                    <View style={styles.row}>
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Tube Number</Text>
+                                            <DropDownPicker
+                                                open={tubeStates.tubeOpen}
+                                                value={formData.tube_number} // Should correspond to 'tube_number'
+                                                items={tubeItems} // Ensure tubeItems has a correct structure
+                                                setOpen={open =>
+                                                    setTubeStates(prevState => ({
+                                                        ...prevState,
+                                                        tubeOpen: open,
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('tube_number', value); // Correct field updated
+                                                }}
+                                                placeholder="Tube Number" // Placeholder corrected
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Joint Number</Text>
+                                            <DropDownPicker
+                                                open={jointStates.jointOpen}
+                                                value={formData.joint_number} // Correct value should be 'joint_number'
+                                                items={jointItems} // Ensure jointItems is structured correctly
+                                                setOpen={open =>
+                                                    setJointStates(prevState => ({
+                                                        ...prevState,
+                                                        jointOpen: open
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('joint_number', value); // Correct field updated
+                                                }}
+                                                placeholder="Joint Number"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+
+                                    </View>
+                                </View>
+
+                                <View style={{ ...styles.cardContainer, zIndex: 600 }}>
+                                    <View style={styles.row}>
+
+
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.label}>Tube Joints</Text>
+                                            <TextInput
+                                                style={styles.textInput}
+                                                value={formData.tube_joints}
+                                                onChangeText={text => handleInputChange('tube_joints', text)}
+                                                placeholder="Enter Tube Joints"
+                                                keyboardType="numeric"
+                                                editable={false}
+                                            />
+                                        </View>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.label}>Job Description</Text>
+                                            <TextInput
+                                                style={[styles.textInput, styles.disabledInput]}
+                                                value={formData.job_desc_number}
+                                                onChangeText={text => handleInputChange('job_desc_number', `${tubeItems}+${jointItems}`)}
+                                                editable={false} // Disabled field
+                                            />
+                                        </View>
+
+                                    </View>
+
+                                </View>
+
+
+
+
+                                <View style={{ ...styles.inputContainer, width: '95%', }}>
+                                    <Text style={styles.label}>Job Details</Text>
+                                    <TextInput
+                                        style={styles.textInput}
+                                        value={formData.job_details}
+                                        onChangeText={text => handleInputChange('job_details', text)}
+                                        placeholder="Enter Job Details"
+                                        multiline
+                                    />
+                                </View>
+
+
+
+
+                                {/* Checkbox Section */}
+                                <View style={styles.cardContainer}>
+                                    <Text style={styles.sectionTitle}>Options</Text>
+                                    <View style={styles.checkboxRow}>
+                                        <CheckBox
+                                            title="RT Required"
+                                            checked={formData.rt_required}
+                                            onPress={() =>
+                                                handleInputChange('rt_required', !formData.rt_required)
+                                            }
+                                        />
+                                        <CheckBox
+                                            title="PAUT Required"
+                                            checked={formData.paut_required}
+                                            onPress={() =>
+                                                handleInputChange('paut_required', !formData.paut_required)
+                                            }
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Submit Button */}
+                                <TouchableOpacity
+                                    style={appStyles.submitButton}
+                                    onPress={handleSubmit}>
+                                    <Text style={appStyles.submitButtonText}>Submit</Text>
+                                </TouchableOpacity>
                             </View>
-
-                            {/* Dropdowns in Grid (2 per row) */}
-                            <View style={styles.gridContainer}>
-                                <DropDownPicker
-                                    open={dropdownStates.unitOpen}
-                                    value={formData.unit_number}
-                                    items={unitItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, unitOpen: open }))}
-                                    setValue={(value) => handleInputChange('unit_number', value)}
-                                    placeholder="Select Unit"
-                                    style={styles.dropdown}
-                                />
-                                <DropDownPicker
-                                    open={dropdownStates.componentOpen}
-                                    value={formData.component_name}
-                                    items={componentItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, componentOpen: open }))}
-                                    setValue={(value) => handleInputChange('component_name', value)}
-                                    placeholder="Select Component"
-                                    style={styles.dropdown}
-                                />
-                            </View>
-
-
-                            <View style={styles.gridContainer}>
-                                <DropDownPicker
-                                    open={dropdownStates.areaOpen}
-                                    value={formData.area}
-                                    items={areaItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, areaOpen: open }))}
-                                    setValue={(value) => handleInputChange('area', value)}
-                                    placeholder="Select Area"
-                                    style={styles.dropdown}
-                                />
-                                <DropDownPicker
-                                    open={dropdownStates.hangerOpen}
-                                    value={formData.hanger_number}
-                                    items={hangerItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, hangerOpen: open }))}
-                                    setValue={(value) => handleInputChange('hanger_number', value)}
-                                    placeholder="Select Hanger"
-                                    style={styles.dropdown}
-                                />
-                            </View>
-
-                            <View style={styles.gridContainer}>
-                                <DropDownPicker
-                                    open={dropdownStates.coilOpen}
-                                    value={formData.coil_number}
-                                    items={coilItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, coilOpen: open }))}
-                                    setValue={(value) => handleInputChange('coil_number', value)}
-                                    placeholder="Select Coil"
-                                    style={styles.dropdown}
-                                />
-                                <DropDownPicker
-                                    open={dropdownStates.panelOpen}
-                                    value={formData.panel_number}
-                                    items={panelItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, panelOpen: open }))}
-                                    setValue={(value) => handleInputChange('panel_number', value)}
-                                    placeholder="Select Panel"
-                                    style={styles.dropdown}
-                                />
-                            </View>
-
-                            <View style={styles.gridContainer}>
-                                <DropDownPicker
-                                    open={dropdownStates.rowOpen}
-                                    value={formData.row_number}
-                                    items={rowItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, rowOpen: open }))}
-                                    setValue={(value) => handleInputChange('row_number', value)}
-                                    placeholder="Select Row"
-                                    style={styles.dropdown}
-                                />
-                                <DropDownPicker
-                                    open={dropdownStates.tubeOpen}
-                                    value={formData.tube_number}
-                                    items={tubeItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, tubeOpen: open }))}
-                                    setValue={(value) => handleInputChange('tube_number', value)}
-                                    placeholder="Select Tube"
-                                    style={styles.dropdown}
-                                />
-                            </View>
-
-                            <View style={styles.gridContainer}>
-                                <DropDownPicker
-                                    open={dropdownStates.jointOpen}
-                                    value={formData.joint_number}
-                                    items={jointItems}
-                                    setOpen={(open) => setDropdownStates((prevState) => ({ ...prevState, jointOpen: open }))}
-                                    setValue={(value) => handleInputChange('joint_number', value)}
-                                    placeholder="Select Joint"
-                                    style={styles.dropdown}
-                                />
-                            </View>
-
-                            <CheckBox
-                                title="RT Required"
-                                checked={formData.rt_required}
-                                onPress={() => handleInputChange('rt_required', !formData.rt_required)}
-                            />
-                            <CheckBox
-                                title="PAUT Required"
-                                checked={formData.paut_required}
-                                onPress={() => handleInputChange('paut_required', !formData.paut_required)}
-                            />
-
-                            <TouchableOpacity style={appStyles.submitButton} onPress={handleSubmit}>
-                                <Text style={appStyles.submitButtonText}>Submit</Text>
-                            </TouchableOpacity>
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
+                <Modal
+                    visible={showModal}
+                    animationType="slide"
+                    transparent={true}
+                    onRequestClose={() => setShowModal(false)}>
+                    <View style={styles.modalContainer}>
+                        <Calendar
+                            style={styles.calendar}
+                            onDayPress={handleDateSelect} // Handle date selection
+                        />
+                    </View>
+                </Modal>
             </SafeAreaView>
-        </View>
+        </View >
+
     );
 };
 
 const styles = StyleSheet.create({
-    gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        marginBottom: 10,
+    cardContainer: {
+        width: '100%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 5,
+        // marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        // elevation: 3,
     },
-    dropdown: {
-        width: '48%', // To make sure there are two columns
-        marginBottom: 10,
+    label: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+        color: '#333',
+    },
+    calendar: {
+        alignSelf: 'center',
+        width: '80%',
+        marginTop: 100,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 10,
+    },
+    textInput: {
+        height: 50,
+        paddingHorizontal: 10,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        backgroundColor: '#fff',
+        fontSize: 16,
+        color: '#000',
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    inputContainer: {
+        width: '48%', // Makes two fields fit side by side,
+    },
+    dropdownStyle: {
+        width: '100%',
+        marginTop: 5,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        borderRadius: 8,
+    },
+    dropdownTextStyle: {
+        fontSize: 15,
+        color: '#333',
+    },
+    dropdownHeader: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#555',
+        marginBottom: 8,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#444',
+        marginBottom: 12,
+    },
+    dateContainer: {
+        height: 50,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+    },
+    checkboxRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
     },
 });
+
 
 export default NewJob;

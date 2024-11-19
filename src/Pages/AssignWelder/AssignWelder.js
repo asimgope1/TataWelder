@@ -1,12 +1,13 @@
-import { View, Text, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView, FlatList, TouchableOpacity, Modal, Button } from 'react-native';
+import { View, Text, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView, FlatList, TouchableOpacity, Modal, Button, StyleSheet } from 'react-native';
 import React, { Fragment, useEffect, useState } from 'react';
 import { BRAND } from '../../constants/color';
 import Header from '../../components/Header';
 import { MyStatusBar } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
-import { GETNETWORK } from '../../utils/Network'; // Assuming you have this utility function
+import { GETNETWORK, POSTNETWORK } from '../../utils/Network'; // Assuming you have this utility function
 import { BAS_URL } from '../../constants/url';
 import DropDownPicker from 'react-native-dropdown-picker'; // Import DropDownPicker
+import { useFocusEffect } from '@react-navigation/native';
 
 const AssignWelder = ({ navigation }) => {
     // State to store the welder list
@@ -17,56 +18,65 @@ const AssignWelder = ({ navigation }) => {
     const [availableWelders, setAvailableWelders] = useState([]); // State for available welders from API
     const [open, setOpen] = useState(false); // State for dropdown open status
     const [items, setItems] = useState([]); // State for dropdown items
-    const [selectedJob, setselectedJob] = useState(''); // State for alert message
+    const [selectedJob, setSelectedJob] = useState(''); // State for selected job
+
+
+    useFocusEffect(
+        React.useCallback(() => {
+            // Do something when the screen is focused
+            fetchWelderList()
+            return () => {
+                // Do something when the screen is unfocused or closed
+            };
+        }, [navigation])
+
+    )
 
     useEffect(() => {
         fetchWelderList();
         fetchAvailableWelders(); // Fetch available welders to assign
     }, []);
 
-    // Function to fetch welder list
-    const fetchWelderList = () => {
+    // Function to fetch welder list using GETNETWORK
+    const fetchWelderList = async () => {
         setLoading(true); // Show loading while fetching
-        const url = `${BAS_URL}welding/welderassign/list/`;
-        GETNETWORK(url, true).then(
-            (response) => {
-                if (response.status === 'success') {
-                    console.log('Welder List:', response.data);
-                    setWelderList(response.data || []); // Update the state with the fetched list or an empty array if null
-                } else {
-                    console.log('Error:', response.message);
-                }
-            },
-        ).catch(error => {
+        try {
+            const url = `${BAS_URL}welding/welderassign/list/`;
+            const response = await GETNETWORK(url, true);
+
+            if (response.status === 'success') {
+                console.log('Welder List:', response.data);
+                setWelderList(response.data || []); // Update the state with the fetched list or an empty array if null
+            } else {
+                console.log('Error:', response.message);
+            }
+        } catch (error) {
             console.error('Error fetching welder list:', error);
-        }).finally(() => {
+        } finally {
             setLoading(false); // Hide loading once the request is complete
-        });
+        }
     };
 
-    // Function to fetch available welders
-    const fetchAvailableWelders = () => {
-        const myHeaders = new Headers();
-        myHeaders.append("Authorization", "Token cf78dfb39e185f7d1951dd55bf6897cff95d1ab6");
+    // Function to fetch available welders using GETNETWORK
+    const fetchAvailableWelders = async () => {
+        try {
+            const url = `${BAS_URL}welding/api/v1/welder-list/`;
+            const response = await GETNETWORK(url, true);
 
-        const requestOptions = {
-            method: "GET",
-            headers: myHeaders,
-            redirect: "follow"
-        };
-
-        fetch(`${BAS_URL}welding/api/v1/welder-list/`, requestOptions)
-            .then((response) => response.json())
-            .then((result) => {
-                console.log('Available Welders:', result.data);
+            if (response.status === 'success') {
+                console.log('Available Welders:', response.data);
                 // Format welders data for dropdown
-                const formattedWelders = result.data.map(welder => ({
+                const formattedWelders = response.data.map(welder => ({
                     label: welder.welder_name,
                     value: welder.weldersl
                 }));
                 setItems(formattedWelders); // Update dropdown items
-            })
-            .catch((error) => console.error('Error fetching available welders:', error));
+            } else {
+                console.log('Error:', response.message);
+            }
+        } catch (error) {
+            console.error('Error fetching available welders:', error);
+        }
     };
 
     // Function to render each item in the FlatList
@@ -78,19 +88,18 @@ const AssignWelder = ({ navigation }) => {
                 padding: 15,
                 marginVertical: 8,
                 marginHorizontal: 10,
-                borderWidth: 1,
-                borderColor: '#ddd',
+                borderLeftWidth: 4,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.2,
                 shadowRadius: 2,
                 elevation: 2,
+                borderLeftColor: 'orange',
+
             }}
             onPress={() => {
-
-
-                setselectedJob(item.sl)
-                setModalVisible(true)
+                setSelectedJob(item.sl);
+                setModalVisible(true);
             }} // Show modal on tap
         >
             <View>
@@ -123,35 +132,34 @@ const AssignWelder = ({ navigation }) => {
         </View>
     );
 
-    // Function to handle assigning welder
-    const handleAssignWelder = () => {
-        console.log('sl', selectedJob, 'selectedWelder', selectedWelder)
+    // Function to handle assigning welder using POSTNETWORK
+    const handleAssignWelder = async () => {
+        console.log('sl', selectedJob, 'selectedWelder', selectedWelder);
+
         if (selectedWelder) {
-            const myHeaders = new Headers();
-            myHeaders.append("Authorization", "Token cf78dfb39e185f7d1951dd55bf6897cff95d1ab6");
-            myHeaders.append("Content-Type", "application/json");
+            try {
+                // Create the payload object
+                const payload = {
+                    sl: parseInt(selectedJob), // Converts selectedJob to an integer
+                    weldersl: selectedWelder,
+                };
 
-            const raw = JSON.stringify({
-                sl: parseInt(selectedJob), // Converts selectedJob to an integer
-                weldersl: selectedWelder,
-            });
+                // Use POSTNETWORK to send the POST request
+                const response = await POSTNETWORK(
+                    `${BAS_URL}welding/welderassign/`,
+                    payload,
+                    true // Pass true if you need the token for authorization
+                );
 
+                // Log the response
+                console.log('Assignment Response:', response);
+                fetchWelderList()
 
-            const requestOptions = {
-                method: "POST",
-                headers: myHeaders,
-                body: raw,
-                redirect: "follow"
-            };
-
-            fetch(`${BAS_URL}welding/welderassign/`, requestOptions)
-                .then((response) => response.json())
-                .then((result) => {
-                    console.log('Assignment Response:', result);
-                    // Close modal after assigning
-                    setModalVisible(false);
-                })
-                .catch((error) => console.error('Error assigning welder:', error));
+                // Close the modal after successful assignment
+                setModalVisible(false);
+            } catch (error) {
+                console.error('Error assigning welder:', error);
+            }
         } else {
             console.log("No welder selected.");
         }
@@ -207,19 +215,9 @@ const AssignWelder = ({ navigation }) => {
                     transparent={true}
                     onRequestClose={() => setModalVisible(false)}
                 >
-                    <View style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    }}>
-                        <View style={{
-                            backgroundColor: 'white',
-                            padding: 20,
-                            borderRadius: 10,
-                            width: '80%',
-                        }}>
-                            <Text style={{ fontSize: 18, marginBottom: 10 }}>Assign Welder</Text>
+                    <View style={styles.modalBackdrop}>
+                        <View style={styles.modalContainer}>
+                            <Text style={styles.modalTitle}>Assign Welder</Text>
 
                             {/* DropDownPicker for welder selection */}
                             <DropDownPicker
@@ -230,16 +228,99 @@ const AssignWelder = ({ navigation }) => {
                                 setValue={setSelectedWelder}
                                 setItems={setItems}
                                 placeholder="Select Welder"
+                                style={styles.dropdownStyle}
+                                textStyle={styles.dropdownTextStyle}
+                                dropDownStyle={styles.dropdownListStyle}
                             />
 
-                            <Button title="Assign Welder" onPress={handleAssignWelder} />
-                            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+                            <View style={styles.buttonContainer}>
+
+                                <TouchableOpacity style={styles.assignButton} onPress={handleAssignWelder}>
+                                    <Text style={styles.buttonText}>Assign Welder</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                                    <Text style={styles.buttonText}>Cancel</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </Modal>
+
             </SafeAreaView>
         </Fragment>
     );
 };
 
 export default AssignWelder;
+
+const styles = StyleSheet.create({
+    modalBackdrop: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 12,
+        width: '85%',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 15,
+    },
+    dropdownStyle: {
+        width: '100%',
+        marginBottom: 15,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+    },
+    dropdownTextStyle: {
+        fontSize: 16,
+        color: '#333',
+    },
+    dropdownListStyle: {
+        backgroundColor: '#f9f9f9',
+        borderColor: '#ccc',
+        borderRadius: 8,
+    },
+    buttonContainer: {
+        width: '100%',
+        marginTop: 20,
+    },
+    assignButton: {
+        backgroundColor: '#4CAF50',  // Green
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginBottom: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cancelButton: {
+        backgroundColor: '#f44336',  // Red
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    }
+});
+
+

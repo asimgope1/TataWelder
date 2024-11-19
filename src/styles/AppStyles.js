@@ -73,6 +73,7 @@ export const appStyles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 10,
   },
   submitButtonText: {
     fontSize: 18,

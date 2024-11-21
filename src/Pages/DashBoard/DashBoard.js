@@ -12,6 +12,7 @@ import { GETNETWORK } from '../../utils/Network';
 import { useFocusEffect } from '@react-navigation/native';
 import { BarChart, PieChart } from "react-native-gifted-charts";
 import { BOLD, EXTRABOLD, LIGHT, REGULAR, SEMIBOLD } from '../../constants/fontfamily';
+import { Loader } from '../../components/Loader';
 
 const DashBoard = ({ navigation }) => {
 
@@ -36,12 +37,15 @@ const DashBoard = ({ navigation }) => {
 
     // Fetch Job List
     const GetJobList = () => {
+        setIsLoading(true)
         const url = `${BAS_URL}welding/jobmaster/joblist/`;
         GETNETWORK(url, true).then(
             (response) => {
                 if (response.status === 'success') {
+                    setIsLoading(false);
                     SetJobList(response.data);
                 } else {
+                    setIsLoading(false);
                     console.log('Error:', response.message);
                 }
             }
@@ -71,8 +75,7 @@ const DashBoard = ({ navigation }) => {
         setRefreshing(false);
     };
 
-    // Render Stats Cards
-    // Function to generate a random color in hex format
+
     const getRandomColor = () => {
         const randomColor = Math.floor(Math.random() * 16777215).toString(16);
         return `#${randomColor}`;
@@ -97,7 +100,7 @@ const DashBoard = ({ navigation }) => {
 
                             <Text
                                 style={{ ...styles.statsName }}
-                                numberOfLines={1} // Limit to 1 line
+                                numberOfLines={2} // Limit to 1 line
                                 ellipsizeMode="tail" // Add ellipsis at the tail if text overflows
                             >
                                 {item.name}
@@ -114,61 +117,77 @@ const DashBoard = ({ navigation }) => {
 
 
 
-    // Render Job Status Bar Chart
-    const renderJobStatusChart = () => {
-        if (!dashboardData) return null;
-        const data = dashboardData.status_count.map(status => ({
-            label: status.name,
-            value: status.count,
-            frontColor: '#4CAF50',
-        }));
-        return (
-            <BarChart
-                data={data}
-                barWidth={30}
-                noOfSections={4}
-                isAnimated
-                hideYAxisText
-            />
-        );
-    };
+    // Render Job Status Bar Char
 
     // Render Pie Chart for Units Overview
-    const LabelLineConfig = {
-        length: 15,                   // Length of the line pointing to the label
-        tailLength: 10,               // Length of the tail part
-        color: 'black',               // Label color
-        thickness: 2,                 // Line thickness
-        labelComponentWidth: 30,      // Label width
-        labelComponentHeight: 15,     // Label height
-        labelComponentMargin: 5,      // Margin around the label component
-        avoidOverlappingOfLabels: true, // Ensures labels don't overlap
-    };
+
 
     const renderStatusPieChart = () => {
         if (!dashboardData || !dashboardData.status_count) return null;
+        const sliceColors = [
+            '#FF5733', // Red-orange
+            '#33FF57', // Green
+            '#3357FF', // Blue
+            '#FF33A1', // Pink
+            '#FF9633', // Orange
+            '#8A33FF', // Purple
+            '#33FFF6', // Aqua
+            '#FFD633', // Yellow
+            '#33FFB8', // Teal
+            '#FF3333', // Red
+        ];
 
-        // Map status_count data to pie chart format
-        const pieData = dashboardData.status_count.map(status => ({
+        const pieData = dashboardData.status_count.map((status, index) => ({
             value: status.count,
             label: status.name,  // Using the name as the label for each slice
-            color: `#${Math.floor(Math.random() * 16777215).toString(16)}`, // Random color for each slice
+            color: sliceColors[index % sliceColors.length], // Cycle through the color list
         }));
 
         return (
-            <PieChart
-                data={pieData}
-                donut
-                innerCircleColor={WHITE}
-                innerCircleBorderWidth={4}
-                innerCircleRadius={50}
-                showText={true}  // Enable text display on the slices
-                textColor={BLACK}  // Text color on the pie chart
-                textSize={12}      // Font size for the labels
-                labelLineConfig={LabelLineConfig}  // Apply custom label line configuration
-            />
+            <View
+                style={{
+                    width: WIDTH * 0.9,
+                    alignSelf: 'center',
+                    alignItems: 'center',
+                }}
+            >
+                <PieChart
+                    data={pieData}
+                    donut
+                    showText
+                    showValuesAsLabels
+                    innerCircleBorderWidth={6}
+                    innerCircleBorderColor="lightgray"
+                    textColor="white"
+                    radius={150}
+                    textSize={20}
+                    labelsPosition='outward'
+                    labelLineConfig={{
+                        stroke: '#333',
+                        strokeWidth: 2,
+                    }}
+                    LabelLineConfig={{
+                        length: 10,
+                        tailLength: 8,
+                        color: '#333', // using a custom color here
+                        thickness: 2,  // strokeWidth can be replaced with thickness
+                        labelComponentWidth: 20,
+                        labelComponentHeight: 10,
+                        labelComponentMargin: 4,
+                        avoidOverlappingOfLabels: true,
+                    }}
+                    extraRadius={15}
+                    externalLabelComponent={({ label, value, color }) => (
+                        <Text style={{ fontSize: 12, color }}>
+                            {`${label}: ${value}`}
+                        </Text>
+                    )}
+
+                />
+            </View>
         );
     };
+
 
     return (
         <Fragment>
@@ -202,6 +221,8 @@ const DashBoard = ({ navigation }) => {
                                     height: HEIGHT * 0.3,
                                     alignItems: 'center',
                                     zIndex: 5,
+                                    borderBottomLeftRadius: 20,
+                                    borderBottomRightRadius: 20
                                     // paddingBottom: 50,
                                 }}
                             >
@@ -213,18 +234,18 @@ const DashBoard = ({ navigation }) => {
                                         onPress={() => navigation.toggleDrawer()}
                                     />
                                 </View>
-                                <View style={{ width: '70%', height: '40%', alignItems: 'center', padding: 10 }}>
-                                    <Text style={{ fontSize: 17, color: WHITE, fontFamily: REGULAR }}>{dashboardData?.stats[0]?.name}</Text>
-                                    <Text style={{ fontSize: 40, color: WHITE, fontFamily: REGULAR }}>{dashboardData?.stats[0]?.figure}({dashboardData?.stats[0]?.total_monthly})</Text>
-                                    <Text style={{ fontSize: 15, color: WHITE, fontFamily: LIGHT }}>
+                                <View style={{ width: '70%', height: '30%', alignItems: 'center', padding: 10, marginBottom: 15 }}>
+                                    <Text style={{ fontSize: RFValue(13), color: WHITE, fontFamily: REGULAR }}>{dashboardData?.stats[0]?.name}</Text>
+                                    <Text style={{ fontSize: RFValue(25), color: WHITE, fontFamily: REGULAR }}>{dashboardData?.stats[0]?.figure}({dashboardData?.stats[0]?.total_monthly})</Text>
+                                    <Text style={{ fontSize: RFValue(13), color: WHITE, fontFamily: LIGHT }}>
                                         {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                                     </Text>
                                 </View>
-                                <View style={{ width: '100%', height: '40%', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 5 }}>
+                                <View style={{ width: '100%', height: '40%', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 0, marginTop: 25 }}>
                                     {dashboardData?.stats.slice(1).map((item, index) => (
-                                        <View key={index} style={{ width: '33%', height: '70%', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 }}>
-                                            <Text style={{ fontSize: RFValue(10), color: WHITE, fontFamily: SEMIBOLD }}>{item.name}</Text>
-                                            <Text style={{ fontSize: 14, color: WHITE, fontFamily: REGULAR }}>{item.figure}({item.total_monthly})</Text>
+                                        <View key={index} style={{ width: '33%', height: '1000%', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 }}>
+                                            <Text style={{ fontSize: RFValue(9.5), color: WHITE, fontFamily: REGULAR }}>{item.name}</Text>
+                                            <Text style={{ fontSize: RFValue(10), color: WHITE, fontFamily: REGULAR }}>{item.figure}({item.total_monthly})</Text>
                                         </View>
                                     ))}
                                 </View>
@@ -234,43 +255,7 @@ const DashBoard = ({ navigation }) => {
                             {renderStatsCards()}
 
                             {/* table to be build */}
-                            <View style={styles.tableContainer}>
-                                <View
-                                    style={{
-                                        height: HEIGHT * 0.05,
-                                        width: WIDTH,
-                                        backgroundColor: BRAND,
-                                        alignSelf: 'center',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        marginBottom: 10,
-                                    }}
-                                >
-                                    <Text style={styles.tableTitle}>Unit Overview</Text>
-                                </View>
 
-                                <View style={styles.tableHeader}>
-                                    <Text style={[styles.tableHeaderText, { backgroundColor: '#f2f2f2' }]}>Unit No</Text>  {/* Light gray background */}
-                                    <Text style={[styles.tableHeaderText, { backgroundColor: '#d6eaf8' }]}>Accepted</Text> {/* Light blue background */}
-                                    <Text style={[styles.tableHeaderText, { backgroundColor: '#d5f5e3' }]}>Repair</Text>   {/* Light green background */}
-                                    <Text style={[styles.tableHeaderText, { backgroundColor: '#f9e79f' }]}>Retake</Text>   {/* Light yellow background */}
-                                    <Text style={[styles.tableHeaderText, { backgroundColor: '#f8c471' }]}>Total Jobs</Text> {/* Light orange background */}
-                                </View>
-
-                                <FlatList
-                                    data={dashboardData?.unit_count} // Use unit_count data
-                                    keyExtractor={(item, index) => index.toString()}
-                                    renderItem={({ item }) => (
-                                        <View style={styles.tableRow}>
-                                            <Text style={[styles.tableText, { backgroundColor: '#f2f2f2' }]}>{item.unit_no}</Text>  {/* Light gray background */}
-                                            <Text style={[styles.tableText, { backgroundColor: '#d6eaf8' }]}>{item.accepted_count}</Text> {/* Light blue background */}
-                                            <Text style={[styles.tableText, { backgroundColor: '#d5f5e3' }]}>{item.repair_count}</Text>   {/* Light green background */}
-                                            <Text style={[styles.tableText, { backgroundColor: '#f9e79f' }]}>{item.retake_count}</Text>   {/* Light yellow background */}
-                                            <Text style={[styles.tableText, { backgroundColor: '#f8c471' }]}>{item.total_jobs}</Text> {/* Light orange background */}
-                                        </View>
-                                    )}
-                                />
-                            </View>
 
 
                             {/* Units Pie Chart */}
@@ -301,6 +286,9 @@ const DashBoard = ({ navigation }) => {
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
+                <Loader
+                    visible={isLoading}
+                />
             </SafeAreaView>
         </Fragment>
     );
@@ -344,12 +332,12 @@ const styles = StyleSheet.create({
     },
     statsCard: {
         backgroundColor: WHITE,
+        height: HEIGHT * 0.1,
         borderWidth: 1,
 
         borderRadius: 10,
         margin: 8,
         marginTop: 15,
-        padding: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.2,
@@ -362,19 +350,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     statsName: {
-        fontSize: RFValue(11),
+        fontSize: RFValue(8),
         color: BLACK,
-        fontFamily: REGULAR,
+        fontWeight: '600'
+        // fontFamily: BOLD,
 
     },
     statsFigure: {
-        fontSize: 24,
+        fontSize: RFValue(15),
         color: BLACK,
         fontFamily: BOLD,
         marginVertical: 5,
     },
     statsMonthly: {
-        fontSize: 12,
+        fontSize: RFValue(10),
         color: GRAY,
     },
     chartContainer: {
@@ -384,7 +373,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     chartTitle: {
-        fontSize: 18,
+        fontSize: RFValue(15),
         color: BLACK,
         fontFamily: SEMIBOLD,
         marginBottom: 10,
@@ -418,7 +407,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     tableHeaderText: {
-        fontSize: 14,
+        fontSize: RFValue(10),
         color: BLACK,
         fontFamily: BOLD,
         flex: 1,
@@ -432,7 +421,7 @@ const styles = StyleSheet.create({
         borderBottomColor: GRAY,
     },
     tableText: {
-        fontSize: 14,
+        fontSize: RFValue(11),
         color: BLACK,
         fontFamily: REGULAR,
         flex: 1,

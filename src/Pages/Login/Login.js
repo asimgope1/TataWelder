@@ -91,6 +91,8 @@ const Login = ({ navigation, route }) => {
 
           });
         } else {
+          setLoader(false);
+          alert('Invalid credentials');
         }
       })
       .catch(() => {
@@ -236,6 +238,7 @@ const Login = ({ navigation, route }) => {
                   onChangeText={text => setEmail(text)}
                 />
                 <TextInput
+                  secureTextEntry={true}
                   label="Password"
                   style={{
                     width: WIDTH * 0.9,

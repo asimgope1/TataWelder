@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView, FlatList, TouchableOpacity, Modal, Button, StyleSheet } from 'react-native';
 import React, { Fragment, useEffect, useState } from 'react';
-import { BRAND } from '../../constants/color';
+import { BLACK, BRAND } from '../../constants/color';
 import Header from '../../components/Header';
 import { MyStatusBar } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
@@ -81,7 +81,7 @@ const AssignWelder = ({ navigation }) => {
 
     // Function to render each item in the FlatList
     const renderWelderItem = ({ item }) => (
-        <TouchableOpacity
+        <View
             style={{
                 backgroundColor: '#f9f9f9',
                 borderRadius: 8,
@@ -97,10 +97,10 @@ const AssignWelder = ({ navigation }) => {
                 borderLeftColor: 'orange',
 
             }}
-            onPress={() => {
-                setSelectedJob(item.sl);
-                setModalVisible(true);
-            }} // Show modal on tap
+        // onPress={() => {
+        //     setSelectedJob(item.sl);
+        //     setModalVisible(true);
+        // }} // Show modal on tap
         >
             <View>
                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
@@ -121,8 +121,28 @@ const AssignWelder = ({ navigation }) => {
                 <Text style={{ fontSize: 12, color: '#888' }}>
                     Job Offer Date: {item.job_offer_date}
                 </Text>
+
+
+
+                <TouchableOpacity
+
+                    onPress={() => {
+                        setSelectedJob(item.sl);
+                        setModalVisible(true);
+                    }}
+                    style={{
+                        backgroundColor: 'green',
+                        paddingVertical: 10,
+                        paddingHorizontal: 25,
+                        borderRadius: 5,
+                        marginTop: 10,
+                    }}
+                >
+                    <Text style={styles.buttonText}>Assign Welder</Text>
+                </TouchableOpacity>
+
             </View>
-        </TouchableOpacity>
+        </View>
     );
 
     // Function to render when the list is empty
@@ -221,6 +241,7 @@ const AssignWelder = ({ navigation }) => {
 
                             {/* DropDownPicker for welder selection */}
                             <DropDownPicker
+                                searchable={true}
                                 open={open}
                                 value={selectedWelder}
                                 items={items}
@@ -318,9 +339,9 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    }
+        fontWeight: '600',
+        textAlign: 'center',
+    },
 });
 
 

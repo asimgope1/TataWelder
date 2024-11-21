@@ -39,10 +39,10 @@ const menuItems = [
     { name: 'Final Approval', icon: 'thumbs-up-down', label: 'Final Approval' },
 ];
 
-
 const CustomDrawerContent = (props) => {
     const { navigation } = props;  // Get the navigation prop from the drawer
     const dispatch = useDispatch()
+
 
     return (
         <DrawerContentScrollView
@@ -132,13 +132,25 @@ const CustomDrawerContent = (props) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.navigationButton, styles.logoutButton]}
-                    onPress={() => {
-                        clearAll()
-                        dispatch(checkuserToken(false))
-                    }} // Navigate to Login screen
+                    onPress={async () => {
+                        try {
+                            await clearAll().then(() => {
+                                // console.log('t',fcmtoken)
+                                // reload the whole app
+
+
+                                // dispatch(checkuserToken());
+                            });
+                            // checkuserToken()
+                            // navigation.navigate('Login'); // Navigate to Auth screen after logout
+                        } catch (error) {
+                            console.error('Error in logout process:', error);
+                        }
+                    }}
                 >
                     <Text style={styles.navigationButtonText}>Logout</Text>
                 </TouchableOpacity>
+
             </View>
 
             {/* Footer Section */}

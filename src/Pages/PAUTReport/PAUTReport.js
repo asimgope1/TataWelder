@@ -13,19 +13,174 @@ import {
     TextInput,
 } from "react-native";
 import React, { Fragment, useEffect, useState } from "react";
-import { BRAND, WHITE } from "../../constants/color";
+import { BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
 import { HEIGHT, MyStatusBar } from "../../constants/config";
 import { appStyles } from "../../styles/AppStyles";
 import { GETNETWORK } from "../../utils/Network";
 import { BAS_URL } from "../../constants/url";
 import { Icon } from "react-native-elements";
+import DropDownPicker from "react-native-dropdown-picker";
+import { Calendar } from "react-native-calendars";
 
 const PAUTReport = ({ navigation }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
     const [filterCriteria, setFilterCriteria] = useState('');
+
+    const [filtermodalVisible, setfilterModalVisible] = useState(false); // State for modal visibility
+
+    const [reportNumber, setReportNumber] = useState('');
+    const [reportDate, setReportDate] = useState('');
+    const [reportTime, setReportTime] = useState('');
+
+
+
+
+    const [startDate, setStartDate] = useState(
+        new Date().toISOString().slice(0, 10)
+    );
+    const [showModal, setShowModal] = useState(false);
+
+
+    const handleDateSelect = day => {
+        setStartDate(day.dateString);
+
+        setReportDate(day.dateString);
+
+        setShowModal(false);
+    };
+
+
+    const handleFilter = (type) => {
+        if (type === 'select') {
+            setfilterModalVisible(!filtermodalVisible);; // Open the modal when "Select Filter" is tapped
+        } else if (type === 'clear') {
+            // Handle filter clear action
+            setFilterCriteria('')
+            setSelectedComponent(null);
+            setSelectedArea(null);
+            setSelectedHanger(null);
+            setSelectedCoil(null)
+            setSelectedPanel(null)
+            setSelectedRow(null)
+            console.log('Filter cleared');
+        }
+    };
+
+
+
+    const [unitItems, setUnitItems] = useState([]);
+    const [selectedUnit, setSelectedUnit] = useState(null);
+    const [unitOpen, setUnitOpen] = useState(false);
+
+    const [componentItems, setComponentItems] = useState([]);
+    const [selectedComponent, setSelectedComponent] = useState(null);
+    const [componentOpen, setComponentOpen] = useState(false);
+
+    const [areaItems, setAreaItems] = useState([]);
+    const [selectedArea, setSelectedArea] = useState(null);
+    const [areaOpen, setAreaOpen] = useState(false);
+
+    const [hangerItems, setHangerItems] = useState([]);
+    const [selectedHanger, setSelectedHanger] = useState(null);
+    const [hangerOpen, setHangerOpen] = useState(false);
+
+    const [coilItems, setCoilItems] = useState([]);
+    const [selectedCoil, setSelectedCoil] = useState(null);
+    const [coilOpen, setCoilOpen] = useState(false);
+
+    const [panelItems, setPanelItems] = useState([]);
+    const [selectedPanel, setSelectedPanel] = useState(null);
+    const [panelOpen, setPanelOpen] = useState(false);
+
+    const [rowItems, setRowItems] = useState([]);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [rowOpen, setRowOpen] = useState(false);
+
+    const [tubeItems, setTubeItems] = useState([]);
+    const [selectedTube, setSelectedTube] = useState(null);
+    const [tubeOpen, setTubeOpen] = useState(false);
+
+    const [jointItems, setJointItems] = useState([]);
+    const [selectedJoint, setSelectedJoint] = useState(null);
+    const [jointOpen, setJointOpen] = useState(false);
+
+    const [welderItems, setwelderItems] = useState([]);
+    const [selectedWelder, setSelectedWelder] = useState(null);
+    const [welderOpen, setWelderOpen] = useState(false);
+
+    // Fetch data when the component mounts
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const url = `${BAS_URL}welding/api/v1/query/filters/`;
+                const response = await GETNETWORK(url, true); // Use GETNETWORK instead of fetch
+
+                if (response.status === "success") {
+                    // Update state with API data
+                    setUnitItems(response.data.unit.map(([id, label]) => ({ label, value: id })));
+                    setComponentItems(response.data.components.map((component) => ({ label: component, value: component })));
+                    setAreaItems(response.data.areas.map((area) => ({ label: area, value: area })));
+                    setHangerItems(response.data.hangers.map((hanger) => ({ label: hanger, value: hanger })));
+                    setCoilItems(response.data.coil_number.map((coil) => ({ label: coil, value: coil })));
+                    setPanelItems(response.data.panel_number.map((panel) => ({ label: panel, value: panel })));
+                    setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
+                    setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
+                    setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
+                    setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
+                } else {
+                    console.log("Error fetching data:", response.message);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
+
+
+
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const handleFilePick = async () => {
+        try {
+            // const [pickResult] = await pick()
+            const [pickResult] = await pick({ mode: 'import' }) // equivalent
+            console.log('picked one', pickResult)
+            setSelectedFile(pickResult)
+            // do something with the picked file
+        } catch (err) {
+            // see error handling
+        }
+    };
+    const handleApiCall = async () => {
+        if (selectedFile) {
+            // Simulating an API call with the selected file data
+            try {
+                const response = await fetch('https://your-api-endpoint.com/upload', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        fileName: selectedFile.name,
+                        fileUri: selectedFile.uri,
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const result = await response.json();
+                console.log('API Response:', result);
+            } catch (error) {
+                console.error('Error in API call:', error);
+            }
+        }
+    };
+
+
 
 
     // Fetch API data
@@ -215,34 +370,305 @@ const PAUTReport = ({ navigation }) => {
             >
                 <View style={styles.modalBackdrop}>
                     <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Submit Report</Text>
+                        <Text style={styles.modalTitle}>Verify Report</Text>
 
-                        {/* DropDownPicker for welder selection */}
-                        <View style={styles.dropdownStyle}>
-                            <Text style={styles.dropdownLabel}>Report Number:</Text>
-                            <Text style={styles.dropdownValue}>#12345</Text>
+                        {/* Input for Report Number */}
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>Report Number:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                placeholder="Enter Report Number"
+                                value={reportNumber} // State value for report number
+                                onChangeText={(text) => setReportNumber(text)} // Update state
+                            />
                         </View>
 
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Report Date:</Text>
-                            <Text style={styles.infoValue}>2024-11-20</Text>
-                        </View>
+                        {/* Input for Report Date */}
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowModal(true);
+                            }}
+                            style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>Report Date:</Text>
+                            <TextInput
+                                style={styles.textInput}
+                                placeholder="Enter Report Date (YYYY-MM-DD)"
+                                value={reportDate} // State value for report date
+                                onChangeText={(text) => setReportDate(text)} // Update state
+                                editable={false}
+                            />
+                        </TouchableOpacity>
 
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Report Time:</Text>
-                            <Text style={styles.infoValue}>14:35</Text>
-                        </View>
+                        {/* Input for Report Time */}
+
+
+
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: GRAY,
+                                padding: 10,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}
+
+                            onPress={handleFilePick}
+                        >
+                            <Text style={{
+                                color: WHITE,
+                                fontSize: 16,
+                                fontWeight: 'bold',
+                            }}>Attach File</Text>
+
+                            <Icon
+                                name="attachment"
+                                size={25}
+                                style={{
+                                    marginLeft: 10,
+                                }}
+                            />
+
+                        </TouchableOpacity>
+
+                        {selectedFile && (
+                            <View style={styles.previewContainer}>
+                                <Text style={styles.previewText}>Selected File:</Text>
+                                <Text style={styles.previewText}>Name: {selectedFile.name}</Text>
+                                { }
+
+                                {/* <TouchableOpacity onPress={handleApiCall} style={styles.apiCallButton}>
+                                    <Text style={styles.emptyListText}>Send to API</Text>
+                                </TouchableOpacity> */}
+                            </View>
+                        )}
 
                         {/* Buttons */}
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity
-                                style={[styles.actionButton, styles.cancelButton]}
-                                onPress={() => setModalVisible(false)}
-                            >
-                                <Text style={styles.buttonText}>Cancel</Text>
-                            </TouchableOpacity>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                width: '100%',
+                                justifyContent: 'space-evenly',
+                            }}
+                        >
+
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.cancelButton]}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <Text style={styles.buttonText}>Cancel</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.submitButton]}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <Text style={styles.buttonText}>Submit</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
+                </View>
+            </Modal>
+
+            <Modal
+                visible={filtermodalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setfilterModalVisible(false)}
+            >
+                <View style={styles.modalBackdrop}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Filter</Text>
+
+
+
+
+                        <DropDownPicker
+                            searchable={true}
+                            open={unitOpen}
+                            value={selectedUnit}
+                            items={unitItems}
+                            setOpen={setUnitOpen}
+                            setValue={setSelectedUnit}
+                            setItems={setUnitItems}
+                            placeholder="Select Unit"
+                            style={{ ...styles.dropdown, zIndex: 1200 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+
+
+                        <DropDownPicker
+                            searchable={true}
+                            open={componentOpen}
+                            value={selectedComponent}
+                            items={componentItems}
+                            setOpen={setComponentOpen}
+                            setValue={setSelectedComponent}
+                            setItems={setComponentItems}
+                            placeholder="Select Component"
+                            style={{ ...styles.dropdown, zIndex: 1100 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        {/* Area Dropdown */}
+                        <DropDownPicker
+                            searchable={true}
+                            open={areaOpen}
+                            value={selectedArea}
+                            items={areaItems}
+                            setOpen={setAreaOpen}
+                            setValue={setSelectedArea}
+                            setItems={setAreaItems}
+                            placeholder="Select Area"
+                            style={{ ...styles.dropdown, zIndex: 1000 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        {/* Hanger Dropdown */}
+                        <DropDownPicker
+                            searchable={true}
+                            open={hangerOpen}
+                            value={selectedHanger}
+                            items={hangerItems}
+                            setOpen={setHangerOpen}
+                            setValue={setSelectedHanger}
+                            setItems={setHangerItems}
+                            placeholder="Select Hanger"
+                            style={{ ...styles.dropdown, zIndex: 900 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={coilOpen}
+                            value={selectedCoil}
+                            items={coilItems}
+                            setOpen={setCoilOpen}
+                            setValue={setSelectedCoil}
+                            setItems={setCoilItems}
+                            placeholder="Select Coil"
+                            style={{ ...styles.dropdown, zIndex: 800 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={panelOpen}
+                            value={selectedPanel}
+                            items={panelItems}
+                            setOpen={setPanelOpen}
+                            setValue={setSelectedPanel}
+                            setItems={setPanelItems}
+                            placeholder="Select Panel"
+                            style={{ ...styles.dropdown, zIndex: 700 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={rowOpen}
+                            value={selectedRow}
+                            items={rowItems}
+                            setOpen={setRowOpen}
+                            setValue={setSelectedRow}
+                            setItems={setRowItems}
+                            placeholder="Select Row"
+                            style={{ ...styles.dropdown, zIndex: 600 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        <DropDownPicker
+                            searchable={true}
+                            open={tubeOpen}
+                            value={selectedTube}
+                            items={tubeItems}
+                            setOpen={setTubeOpen}
+                            setValue={setSelectedTube}
+                            setItems={setTubeItems}
+                            placeholder="Select Tube"
+                            style={{ ...styles.dropdown, zIndex: 500 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={jointOpen}
+                            value={selectedJoint}
+                            items={jointItems}
+                            setOpen={setJointOpen}
+                            setValue={setSelectedJoint}
+                            setItems={setJointItems}
+                            placeholder="Select Joint"
+                            style={{ ...styles.dropdown, zIndex: 400 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={welderOpen}
+                            value={selectedWelder}
+                            items={welderItems}
+                            setOpen={setWelderOpen}
+                            setValue={setSelectedWelder}
+                            setItems={setwelderItems}
+                            placeholder="Select welder"
+                            style={{ ...styles.dropdown, zIndex: 300 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        {/* Buttons */}
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                width: '100%',
+                                justifyContent: 'space-evenly',
+                            }}
+                        >
+
+
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.cancelButton]}
+                                    onPress={() => setfilterModalVisible(false)}
+                                >
+                                    <Text style={styles.buttonText}>Cancel</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.submitButton]}
+                                    onPress={() => {
+                                        const criteria = [
+                                            selectedComponent,
+                                            selectedArea,
+                                            selectedHanger,
+                                            selectedCoil,
+                                            selectedPanel,
+                                            selectedRow,
+                                        ]
+                                            .filter(Boolean) // Remove any null or undefined values
+                                            .join(', '); // Join them with a comma for better readability
+
+                                        setFilterCriteria(criteria); // Set the concatenated string
+                                        setfilterModalVisible(false);
+                                    }}
+
+                                >
+                                    <Text style={styles.buttonText}>Submit</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                visible={showModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowModal(false)}>
+                <View style={styles.modalContainer}>
+                    <Calendar
+                        style={styles.calendar}
+                        onDayPress={handleDateSelect} // Handle date selection
+                    />
                 </View>
             </Modal>
         </Fragment>
@@ -254,7 +680,7 @@ export default PAUTReport;
 const styles = StyleSheet.create({
     modalBackdrop: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -276,40 +702,23 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         color: '#333',
     },
-    dropdownStyle: {
-        width: '100%',
+    inputContainer: {
         marginBottom: 15,
-        padding: 10,
-        borderColor: '#ddd',
-        borderWidth: 1,
-        borderRadius: 8,
-        backgroundColor: '#f9f9f9',
     },
-    dropdownLabel: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: 'black',
-    },
-    dropdownValue: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: '#333',
-        marginTop: 5,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    infoLabel: {
+    inputLabel: {
         fontSize: 14,
         fontWeight: '600',
         color: '#555',
+        marginBottom: 5,
     },
-    infoValue: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#333',
+    textInput: {
+        width: '100%',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 10,
+        fontSize: 16,
+        backgroundColor: '#f9f9f9',
     },
     buttonContainer: {
         marginTop: 20,
@@ -322,8 +731,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     cancelButton: {
-        backgroundColor: '#FF3B30', // Red for cancel button
+        backgroundColor: '#FF3B30',
     },
+    submitButton: {
+        backgroundColor: '#4CAF50',  // Green
+    },
+
     buttonText: {
         fontSize: 16,
         fontWeight: '600',

@@ -106,7 +106,7 @@ const RTReport = ({ navigation }) => {
     const [selectedJoint, setSelectedJoint] = useState(null);
     const [jointOpen, setJointOpen] = useState(false);
 
-    const [welderItems, setWelderItems] = useState([]);
+    const [welderItems, setwelderItems] = useState([]);
     const [selectedWelder, setSelectedWelder] = useState(null);
     const [welderOpen, setWelderOpen] = useState(false);
 
@@ -128,7 +128,7 @@ const RTReport = ({ navigation }) => {
                     setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
                     setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
                     setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
-                    setWelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
+                    setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
                 } else {
                     console.log("Error fetching data:", response.message);
                 }
@@ -579,7 +579,7 @@ const RTReport = ({ navigation }) => {
                             searchable={true}
                             open={tubeOpen}
                             value={selectedTube}
-                            items={tubeitems}
+                            items={tubeItems}
                             setOpen={setTubeOpen}
                             setValue={setSelectedTube}
                             setItems={setTubeItems}

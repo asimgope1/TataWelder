@@ -8,19 +8,123 @@ import {
     FlatList,
     TouchableOpacity,
     ActivityIndicator,
+    Modal,
+    TextInput,
 } from 'react-native';
 import React, { Fragment, useEffect, useState } from 'react';
-import { BRAND, RED } from '../../constants/color';
+import { BRAND, RED, WHITE } from '../../constants/color';
 import Header from '../../components/Header';
 import { HEIGHT, MyStatusBar } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
 import { GETNETWORK, POSTNETWORK } from '../../utils/Network';
 import { BAS_URL } from '../../constants/url';
 import { Icon } from 'react-native-elements';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { styles } from '../TPI/TPI';
 
 const FinalApproval = ({ navigation }) => {
     const [JobList, SetJobList] = useState([]);
     const [loading, setLoading] = useState(true); // Loading state to manage data fetching
+
+
+    const [filterCriteria, setFilterCriteria] = useState('');
+
+    const [filtermodalVisible, setfilterModalVisible] = useState(false); // State for modal visibility
+
+
+
+
+
+    const handleFilter = (type) => {
+        if (type === 'select') {
+            setfilterModalVisible(!filtermodalVisible);; // Open the modal when "Select Filter" is tapped
+        } else if (type === 'clear') {
+            // Handle filter clear action
+            setFilterCriteria('')
+            setSelectedComponent(null);
+            setSelectedArea(null);
+            setSelectedHanger(null);
+            setSelectedCoil(null)
+            setSelectedPanel(null)
+            setSelectedRow(null)
+            console.log('Filter cleared');
+        }
+    };
+
+
+
+    const [unitItems, setUnitItems] = useState([]);
+    const [selectedUnit, setSelectedUnit] = useState(null);
+    const [unitOpen, setUnitOpen] = useState(false);
+
+    const [componentItems, setComponentItems] = useState([]);
+    const [selectedComponent, setSelectedComponent] = useState(null);
+    const [componentOpen, setComponentOpen] = useState(false);
+
+    const [areaItems, setAreaItems] = useState([]);
+    const [selectedArea, setSelectedArea] = useState(null);
+    const [areaOpen, setAreaOpen] = useState(false);
+
+    const [hangerItems, setHangerItems] = useState([]);
+    const [selectedHanger, setSelectedHanger] = useState(null);
+    const [hangerOpen, setHangerOpen] = useState(false);
+
+    const [coilItems, setCoilItems] = useState([]);
+    const [selectedCoil, setSelectedCoil] = useState(null);
+    const [coilOpen, setCoilOpen] = useState(false);
+
+    const [panelItems, setPanelItems] = useState([]);
+    const [selectedPanel, setSelectedPanel] = useState(null);
+    const [panelOpen, setPanelOpen] = useState(false);
+
+    const [rowItems, setRowItems] = useState([]);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [rowOpen, setRowOpen] = useState(false);
+
+    const [tubeItems, setTubeItems] = useState([]);
+    const [selectedTube, setSelectedTube] = useState(null);
+    const [tubeOpen, setTubeOpen] = useState(false);
+
+    const [jointItems, setJointItems] = useState([]);
+    const [selectedJoint, setSelectedJoint] = useState(null);
+    const [jointOpen, setJointOpen] = useState(false);
+
+    const [welderItems, setwelderItems] = useState([]);
+    const [selectedWelder, setSelectedWelder] = useState(null);
+    const [welderOpen, setWelderOpen] = useState(false);
+
+    // Fetch data when the component mounts
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const url = `${BAS_URL}welding/api/v1/query/filters/`;
+                const response = await GETNETWORK(url, true); // Use GETNETWORK instead of fetch
+
+                if (response.status === "success") {
+                    // Update state with API data
+                    setUnitItems(response.data.unit.map(([id, label]) => ({ label, value: id })));
+                    setComponentItems(response.data.components.map((component) => ({ label: component, value: component })));
+                    setAreaItems(response.data.areas.map((area) => ({ label: area, value: area })));
+                    setHangerItems(response.data.hangers.map((hanger) => ({ label: hanger, value: hanger })));
+                    setCoilItems(response.data.coil_number.map((coil) => ({ label: coil, value: coil })));
+                    setPanelItems(response.data.panel_number.map((panel) => ({ label: panel, value: panel })));
+                    setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
+                    setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
+                    setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
+                    setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
+                } else {
+                    console.log("Error fetching data:", response.message);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
+
 
     const handleApproval = async (item) => {
         const payload = {
@@ -87,28 +191,7 @@ const FinalApproval = ({ navigation }) => {
         GetJobList();
     }, []);
 
-    const styles = {
-        cardTitle: {
-            fontSize: 16,
-            fontWeight: 'bold',
-            color: '#333',
-            marginBottom: 4,
-        },
-        cardSubtitle: {
-            fontSize: 14,
-            color: '#555',
-            marginBottom: 4,
-        },
-        cardDate: {
-            fontSize: 12,
-            color: '#888',
-        },
-        buttonText: {
-            color: 'white',
-            fontWeight: '600',
-            textAlign: 'center',
-        },
-    };
+
 
     const GetJobList = async () => {
         const url = `${BAS_URL}welding/jobmaster/joblist/`;
@@ -159,10 +242,10 @@ const FinalApproval = ({ navigation }) => {
 
                     {/* Job Description Section */}
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.cardTitle}>Job Number: {item.job_number}</Text>
-                        <Text style={styles.cardSubtitle}>Job Desc: {item.job_desc_number}</Text>
-                        <Text style={styles.cardDate}>Job Date: {item.job_offer_date}</Text>
-                        <Text style={styles.cardDate}>Unit Number: {item.unit_number}</Text>
+                        <Text style={styless.cardTitle}>Job Number: {item.job_number}</Text>
+                        <Text style={styless.cardSubtitle}>Job Desc: {item.job_desc_number}</Text>
+                        <Text style={styless.cardDate}>Job Date: {item.job_offer_date}</Text>
+                        <Text style={styless.cardDate}>Unit Number: {item.unit_number}</Text>
                     </View>
                 </View>
 
@@ -185,7 +268,7 @@ const FinalApproval = ({ navigation }) => {
                         }}
                         onPress={() => handleApproval(item)}
                     >
-                        <Text style={styles.buttonText}>Approve</Text>
+                        <Text style={styless.buttonText}>Approve</Text>
                     </TouchableOpacity>
 
                     {/* Cancel Button */}
@@ -230,22 +313,290 @@ const FinalApproval = ({ navigation }) => {
                             {loading ? (
                                 <ActivityIndicator size="large" color={BRAND} />
                             ) : (
-                                <FlatList
-                                    data={JobList}
-                                    renderItem={renderItem}
-                                    keyExtractor={(item, index) => index.toString()}
-                                    contentContainerStyle={{ paddingTop: 10 }}
-                                    ListFooterComponent={
-                                        <View style={{ height: HEIGHT * 0.05 }} />
-                                    }
-                                />
+                                <>
+                                    <View style={styles.filterContainer}>
+                                        {/* Left side content, 70% width */}
+                                        <View style={styles.leftContent}>
+                                            {/* <TouchableOpacity style={styles.filterButton}> */}
+                                            <TextInput
+                                                style={styles.filterTextInput}
+                                                placeholder="Enter Filter Criteria"
+                                                placeholderTextColor="#888"
+                                                value={filterCriteria}
+                                                editable={false}
+                                                multiline
+                                            // onChangeText={(text) => setFilterCriteria(text)}
+                                            />
+                                            {/* </TouchableOpacity> */}
+                                        </View>
+
+                                        {/* Right side buttons, 30% width */}
+                                        <View style={styles.rightButtons}>
+                                            <TouchableOpacity
+                                                style={styles.selectButton}
+                                                onPress={() => handleFilter('select')}
+                                            > <Icon
+                                                    name={'filter-alt'}
+                                                    type='material'
+                                                    color={WHITE}
+                                                    size={24}
+                                                    containerStyle={{ marginBottom: 5 }}
+                                                />
+                                                <Text style={{
+                                                    color: '#fff',
+                                                    fontSize: 12,
+                                                    fontWeight: 'bold',
+                                                }}>Filter</Text>
+                                            </TouchableOpacity>
+
+                                            <TouchableOpacity
+                                                style={{ ...styles.clearButton, backgroundColor: filterCriteria.length > 0 ? '#FF6347' : '#4CAF50' }}
+                                                onPress={() => handleFilter('clear')}
+                                            >
+                                                <Icon
+                                                    name={'delete'}
+                                                    type='material'
+                                                    color={WHITE}
+                                                    size={24}
+                                                    containerStyle={{ marginBottom: 5 }}
+                                                />
+                                                <Text style={{
+                                                    color: '#fff',
+                                                    fontSize: 12,
+                                                    fontWeight: 'bold',
+                                                }}>Clear </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+
+                                    <FlatList
+                                        data={JobList}
+                                        renderItem={renderItem}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        contentContainerStyle={{ paddingTop: 10 }}
+                                        ListFooterComponent={
+                                            <View style={{ height: HEIGHT * 0.05 }} />
+                                        }
+                                    />
+                                </>
                             )}
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
             </SafeAreaView>
+
+            <Modal
+                visible={filtermodalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setfilterModalVisible(false)}
+            >
+                <View style={styles.modalBackdrop}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Filter</Text>
+
+
+
+
+                        <DropDownPicker
+                            searchable={true}
+                            open={unitOpen}
+                            value={selectedUnit}
+                            items={unitItems}
+                            setOpen={setUnitOpen}
+                            setValue={setSelectedUnit}
+                            setItems={setUnitItems}
+                            placeholder="Select Unit"
+                            style={{ ...styles.dropdown, zIndex: 1200 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+
+
+                        <DropDownPicker
+                            searchable={true}
+                            open={componentOpen}
+                            value={selectedComponent}
+                            items={componentItems}
+                            setOpen={setComponentOpen}
+                            setValue={setSelectedComponent}
+                            setItems={setComponentItems}
+                            placeholder="Select Component"
+                            style={{ ...styles.dropdown, zIndex: 1100 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        {/* Area Dropdown */}
+                        <DropDownPicker
+                            searchable={true}
+                            open={areaOpen}
+                            value={selectedArea}
+                            items={areaItems}
+                            setOpen={setAreaOpen}
+                            setValue={setSelectedArea}
+                            setItems={setAreaItems}
+                            placeholder="Select Area"
+                            style={{ ...styles.dropdown, zIndex: 1000 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        {/* Hanger Dropdown */}
+                        <DropDownPicker
+                            searchable={true}
+                            open={hangerOpen}
+                            value={selectedHanger}
+                            items={hangerItems}
+                            setOpen={setHangerOpen}
+                            setValue={setSelectedHanger}
+                            setItems={setHangerItems}
+                            placeholder="Select Hanger"
+                            style={{ ...styles.dropdown, zIndex: 900 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={coilOpen}
+                            value={selectedCoil}
+                            items={coilItems}
+                            setOpen={setCoilOpen}
+                            setValue={setSelectedCoil}
+                            setItems={setCoilItems}
+                            placeholder="Select Coil"
+                            style={{ ...styles.dropdown, zIndex: 800 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={panelOpen}
+                            value={selectedPanel}
+                            items={panelItems}
+                            setOpen={setPanelOpen}
+                            setValue={setSelectedPanel}
+                            setItems={setPanelItems}
+                            placeholder="Select Panel"
+                            style={{ ...styles.dropdown, zIndex: 700 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={rowOpen}
+                            value={selectedRow}
+                            items={rowItems}
+                            setOpen={setRowOpen}
+                            setValue={setSelectedRow}
+                            setItems={setRowItems}
+                            placeholder="Select Row"
+                            style={{ ...styles.dropdown, zIndex: 600 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        <DropDownPicker
+                            searchable={true}
+                            open={tubeOpen}
+                            value={selectedTube}
+                            items={tubeItems}
+                            setOpen={setTubeOpen}
+                            setValue={setSelectedTube}
+                            setItems={setTubeItems}
+                            placeholder="Select Tube"
+                            style={{ ...styles.dropdown, zIndex: 500 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={jointOpen}
+                            value={selectedJoint}
+                            items={jointItems}
+                            setOpen={setJointOpen}
+                            setValue={setSelectedJoint}
+                            setItems={setJointItems}
+                            placeholder="Select Joint"
+                            style={{ ...styles.dropdown, zIndex: 400 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={welderOpen}
+                            value={selectedWelder}
+                            items={welderItems}
+                            setOpen={setWelderOpen}
+                            setValue={setSelectedWelder}
+                            setItems={setwelderItems}
+                            placeholder="Select welder"
+                            style={{ ...styles.dropdown, zIndex: 300 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
+                        {/* Buttons */}
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                width: '100%',
+                                justifyContent: 'space-evenly',
+                            }}
+                        >
+
+
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.cancelButton]}
+                                    onPress={() => setfilterModalVisible(false)}
+                                >
+                                    <Text style={styles.buttonText}>Cancel</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.submitButton]}
+                                    onPress={() => {
+                                        const criteria = [
+                                            selectedComponent,
+                                            selectedArea,
+                                            selectedHanger,
+                                            selectedCoil,
+                                            selectedPanel,
+                                            selectedRow,
+                                        ]
+                                            .filter(Boolean) // Remove any null or undefined values
+                                            .join(', '); // Join them with a comma for better readability
+
+                                        setFilterCriteria(criteria); // Set the concatenated string
+                                        setfilterModalVisible(false);
+                                    }}
+
+                                >
+                                    <Text style={styles.buttonText}>Submit</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </Fragment>
     );
 };
 
 export default FinalApproval;
+
+const styless = {
+    cardTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    cardSubtitle: {
+        fontSize: 14,
+        color: '#555',
+        marginBottom: 4,
+    },
+    cardDate: {
+        fontSize: 12,
+        color: '#888',
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+};

@@ -39,7 +39,6 @@ export const deleteByKeys = async keys => {
 export const clearAll = async () => {
   try {
     await AsyncStorage.clear();
-    dispatch(checkuserToken())
   } catch (e) {
     // clear error
   }

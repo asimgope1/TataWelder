@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
@@ -6,11 +6,10 @@ import { Icon } from 'react-native-elements';
 import { BLACK, BRAND, WHITE } from '../constants/color';
 import { HEIGHT, WIDTH } from '../constants/config';
 import { BOLD, REGULAR, SEMIBOLD } from '../constants/fontfamily';
-import Header from '../components/Header';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { clearAll } from '../utils/Storage';
-import { checkuserToken } from '../redux/actions/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
+import { getObjByKey } from '../utils/Storage';
 
 // Define a larger set of colors for unique coloring of each item
 const colors = [
@@ -31,7 +30,6 @@ const menuItems = [
     { name: 'New Job', icon: 'new-label', label: 'New Job' },
     { name: 'Job Approval', icon: 'thumb-up', label: 'Job Approval' },
     { name: 'Assign Welder', icon: 'work', label: 'Assign Welder' },
-
     { name: 'RT Report', icon: 'menu-book', label: 'RT Report' },
     { name: 'PAUT-Report', icon: 'menu-book', label: 'PAUT Report' },
     { name: 'Quality Verification', icon: 'check-circle-outline', label: 'Q-Verification' },
@@ -40,50 +38,27 @@ const menuItems = [
 ];
 
 const CustomDrawerContent = (props) => {
-    const { navigation } = props;  // Get the navigation prop from the drawer
-    const dispatch = useDispatch()
+    const { navigation } = props;
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        GetPermissions();
+    }, []);
+
+    const GetPermissions = async () => {
+        const Permissions = await getObjByKey('loginResponse');
+        console.log('Permissions', Permissions);
+    };
+
+    const handleLogout = async () => {
+        await AsyncStorage.clear();
+        navigation.navigate('LoginStack');
+        alert('Logout Successfully. Please reload the app to log in again.');
+    };
 
     return (
-        <DrawerContentScrollView
-            {...props}
-            contentContainerStyle={styles.drawerContainer}
-        >
-
+        <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContainer}>
             {/* Header Section */}
-
-            <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',  // Spread items across left and right ends
-                    alignItems: 'center',
-                    width: '100%',
-                    margin: -5,
-                    alignSelf: 'center',
-                    backgroundColor: BRAND,
-                    height: HEIGHT * 0.03,
-                    paddingHorizontal: WIDTH * 0.05,  // Add some padding for space on the sides
-                }}
-            >
-                {/* <Icon
-                    name='menu'
-                    size={35}
-                    color={WHITE}
-                    onPress={() => navigation.toggleDrawer()}
-                />
-                <Text
-                    style={{
-                        fontSize: RFValue(17),
-                        fontFamily: BOLD,
-                        color: WHITE,
-                        marginLeft: 10,  // You can adjust this margin to add space between icon and text
-                    }}
-                >
-                    Menu
-                </Text> */}
-            </View>
-
-
 
 
             {/* Profile Section */}
@@ -106,7 +81,7 @@ const CustomDrawerContent = (props) => {
                         <TouchableOpacity
                             style={[
                                 styles.menuItem,
-                                { backgroundColor: colors[index % colors.length] }, // Assign a unique color
+                                { backgroundColor: colors[index % colors.length] },
                             ]}
                             onPress={() => navigation.navigate(item.name)}
                         >
@@ -126,31 +101,16 @@ const CustomDrawerContent = (props) => {
                     onPress={() => {
                         navigation.toggleDrawer();
                         navigation.navigate('DashBoard');
-                    }} // Navigate to Home screen
+                    }}
                 >
                     <Text style={styles.navigationButtonText}>Home</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.navigationButton, styles.logoutButton]}
-                    onPress={async () => {
-                        try {
-                            await clearAll().then(() => {
-                                // console.log('t',fcmtoken)
-                                // reload the whole app
-
-
-                                // dispatch(checkuserToken());
-                            });
-                            // checkuserToken()
-                            // navigation.navigate('Login'); // Navigate to Auth screen after logout
-                        } catch (error) {
-                            console.error('Error in logout process:', error);
-                        }
-                    }}
+                    onPress={handleLogout}
                 >
                     <Text style={styles.navigationButtonText}>Logout</Text>
                 </TouchableOpacity>
-
             </View>
 
             {/* Footer Section */}
@@ -163,41 +123,54 @@ const CustomDrawerContent = (props) => {
 
 const styles = StyleSheet.create({
     drawerContainer: {
-        flex: 1,
+        flexGrow: 1,
         backgroundColor: WHITE,
+        paddingVertical: HEIGHT * 0.02,
+    },
+    // Header styles
+    headerContainer: {
+        backgroundColor: BRAND,
+        paddingVertical: HEIGHT * 0.015,
+        paddingHorizontal: WIDTH * 0.05,
+        justifyContent: 'center',
+    },
+    headerTitle: {
+        fontSize: RFValue(17),
+        fontFamily: BOLD,
+        color: WHITE,
     },
     // Profile styles
     profileContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: WHITE, // Light gray background for profile section
+        padding: WIDTH * 0.05,
+        backgroundColor: WHITE,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
     profileImage: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        marginRight: 15,
+        width: RFValue(60),
+        height: RFValue(60),
+        borderRadius: 30,
+        marginRight: WIDTH * 0.05,
         backgroundColor: '#ddd',
     },
     profileDetails: {
         flex: 1,
     },
     profileName: {
-        fontSize: 18,
+        fontSize: RFValue(16),
         fontFamily: BOLD,
         color: BLACK,
     },
     profileDepartment: {
-        fontSize: 14,
+        fontSize: RFValue(12),
         color: '#666',
         fontFamily: REGULAR,
         marginTop: 5,
     },
     profileEmail: {
-        fontSize: 12,
+        fontSize: RFValue(10),
         color: '#999',
         fontFamily: SEMIBOLD,
         marginTop: 5,
@@ -206,74 +179,71 @@ const styles = StyleSheet.create({
     gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-around', // Center items with even spacing
-        paddingVertical: 20,
+        justifyContent: 'space-around',
+        paddingVertical: HEIGHT * 0.02,
     },
     menuItemContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        width: WIDTH * 0.28, // Slightly adjusted to fit the screen better
+        width: WIDTH * 0.28,
         margin: 10,
     },
     menuItem: {
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        height: 90,
-        borderRadius: 15, // More rounded corners for modern look
+        height: HEIGHT * 0.12,
+        borderRadius: 15,
+        margin: 5,
         opacity: 0.95,
-        margin: 10,
     },
     iconContainer: {
         marginBottom: 8,
     },
     label: {
         color: BLACK,
-        fontSize: 14,
+        fontSize: RFValue(12),
         fontWeight: '800',
         textAlign: 'center',
         marginTop: 5,
-        // fontFamily: ,
     },
     // Navigation buttons
     navigationButtonsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginVertical: 20,
-        paddingHorizontal: 20,
+        marginVertical: HEIGHT * 0.025,
+        paddingHorizontal: WIDTH * 0.05,
     },
     navigationButton: {
         flex: 1,
-        height: 45,
+        height: HEIGHT * 0.06,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 25,
-        marginHorizontal: 10,
-        backgroundColor: '#007AFF',
+        marginHorizontal: WIDTH * 0.02,
     },
     homeButton: {
-        backgroundColor: '#34C759', // Green color for Home button
+        backgroundColor: '#34C759',
     },
     logoutButton: {
-        backgroundColor: '#FF3B30', // Red color for Logout button
+        backgroundColor: '#FF3B30',
     },
     navigationButtonText: {
         color: WHITE,
-        fontSize: 16,
+        fontSize: RFValue(14),
         fontFamily: BOLD,
     },
     // Footer styles
     footerContainer: {
-        padding: 15,
+        width: '100%',
+        padding: HEIGHT * 0.02,
         alignItems: 'center',
         borderTopWidth: 1,
         borderTopColor: '#ddd',
-        backgroundColor: '#f9f9f9', // Light gray for footer
-        marginTop: HEIGHT * 0.022,
-        marginBottom: HEIGHT * 0.05,
+        backgroundColor: '#f9f9f9',
     },
     footerText: {
-        fontSize: 12,
+        fontSize: RFValue(10),
         color: '#888',
         fontFamily: BOLD,
     },

@@ -186,28 +186,73 @@ const TPI = ({ navigation }) => {
 
 
 
-    // Fetch API data
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true)
-            const url = `${BAS_URL}welding/api/v1/to-be-tpiinspection-list/`;
-            GETNETWORK(url, true).then(
-                (response) => {
-                    if (response.status === 'success') {
-                        setData(response.data)
-                        console.log('data', response);
-                        setLoading(false);
-                        // SetJobList(response.data);
-                    } else {
-                        setLoading(false);
-                        console.log('Error:', response.message);
-                    }
+
+    const fetchData = async (params = {}) => {
+        setLoading(true);
+
+        // Base URL
+        const url = `${BAS_URL}welding/api/v1/to-be-tpiinspection-list/`;
+
+        // Check if there are any query params in the `params` object
+        const queryString = Object.keys(params).length
+            ? `?${new URLSearchParams(params).toString()}`
+            : ''; // Construct query string
+
+        // Final URL with or without query parameters
+        const finalUrl = `${url}${queryString}`;
+
+        console.log("Final URL:", finalUrl); // Debug: Check constructed URL
+
+        // Fetch data using GETNETWORK with the constructed URL
+        GETNETWORK(finalUrl, true)
+            .then((response) => {
+                if (response.status === 'success') {
+                    setData(response.data);
+                    console.log('PAUTReport', response);
+
+                    // Reset selected filters after data is fetched
+                    // setSelectedUnit(null);
+                    // setSelectedComponent(null);
+                    // setSelectedArea(null);
+                    // setSelectedHanger(null);
+                    // setSelectedCoil(null);
+                    // setSelectedPanel(null);
+                    // setSelectedRow(null);
+                    // setSelectedTube(null);
+                    // setSelectedJoint(null);
+                    // setSelectedWelder(null);
+                    setLoading(false);
+                } else {
+                    // Reset selected filters in case of error
+                    setLoading(false);
+                    setSelectedUnit(null);
+                    setSelectedComponent(null);
+                    setSelectedArea(null);
+                    setSelectedHanger(null);
+                    setSelectedCoil(null);
+                    setSelectedPanel(null);
+                    setSelectedRow(null);
+                    setSelectedTube(null);
+                    setSelectedJoint(null);
+                    setSelectedWelder(null);
+                    console.log('Error:', response.message);
                 }
-            );
-        };
+            })
+            .catch((error) => {
+                setLoading(false);
+                console.error('Fetch Error:', error);
+            });
+    };
+
+
+    useEffect(() => {
 
         fetchData();
     }, []);
+
+
+    // Fetch API data
+
 
     const renderItem = ({ item }) => (
         <View
@@ -473,7 +518,6 @@ const TPI = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
-
             <Modal
                 visible={filtermodalVisible}
                 animationType="slide"
@@ -481,12 +525,12 @@ const TPI = ({ navigation }) => {
                 onRequestClose={() => setfilterModalVisible(false)}
             >
                 <View style={styles.modalBackdrop}>
-                    <View style={styles.modalContainer}>
+                    <ScrollView contentContainerStyle={styles.modalContainer} >
                         <Text style={styles.modalTitle}>Filter</Text>
 
+                        {/* Unit Dropdown */}
 
-
-
+                        <Text style={styles.dropdownHeader}>Unit</Text>
                         <DropDownPicker
                             searchable={true}
                             open={unitOpen}
@@ -500,8 +544,8 @@ const TPI = ({ navigation }) => {
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
 
-
-
+                        {/* Component Dropdown */}
+                        <Text style={styles.dropdownHeader}>Component</Text>
                         <DropDownPicker
                             searchable={true}
                             open={componentOpen}
@@ -516,6 +560,7 @@ const TPI = ({ navigation }) => {
                         />
 
                         {/* Area Dropdown */}
+                        <Text style={styles.dropdownHeader}>Area</Text>
                         <DropDownPicker
                             searchable={true}
                             open={areaOpen}
@@ -530,6 +575,7 @@ const TPI = ({ navigation }) => {
                         />
 
                         {/* Hanger Dropdown */}
+                        <Text style={styles.dropdownHeader}>Hanger</Text>
                         <DropDownPicker
                             searchable={true}
                             open={hangerOpen}
@@ -542,6 +588,9 @@ const TPI = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 900 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Coil Dropdown */}
+                        <Text style={styles.dropdownHeader}>Coil</Text>
                         <DropDownPicker
                             searchable={true}
                             open={coilOpen}
@@ -554,6 +603,9 @@ const TPI = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 800 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Panel Dropdown */}
+                        <Text style={styles.dropdownHeader}>Panel</Text>
                         <DropDownPicker
                             searchable={true}
                             open={panelOpen}
@@ -566,6 +618,9 @@ const TPI = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 700 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Row Dropdown */}
+                        <Text style={styles.dropdownHeader}>Row</Text>
                         <DropDownPicker
                             searchable={true}
                             open={rowOpen}
@@ -579,6 +634,8 @@ const TPI = ({ navigation }) => {
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
 
+                        {/* Tube Dropdown */}
+                        <Text style={styles.dropdownHeader}>Tube</Text>
                         <DropDownPicker
                             searchable={true}
                             open={tubeOpen}
@@ -591,6 +648,9 @@ const TPI = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 500 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Joint Dropdown */}
+                        <Text style={styles.dropdownHeader}>Joint</Text>
                         <DropDownPicker
                             searchable={true}
                             open={jointOpen}
@@ -603,6 +663,9 @@ const TPI = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 400 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Welder Dropdown */}
+                        <Text style={styles.dropdownHeader}>Welder</Text>
                         <DropDownPicker
                             searchable={true}
                             open={welderOpen}
@@ -611,7 +674,7 @@ const TPI = ({ navigation }) => {
                             setOpen={setWelderOpen}
                             setValue={setSelectedWelder}
                             setItems={setwelderItems}
-                            placeholder="Select welder"
+                            placeholder="Select Welder"
                             style={{ ...styles.dropdown, zIndex: 300 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
@@ -624,8 +687,6 @@ const TPI = ({ navigation }) => {
                                 justifyContent: 'space-evenly',
                             }}
                         >
-
-
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.cancelButton]}
@@ -638,27 +699,57 @@ const TPI = ({ navigation }) => {
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.submitButton]}
                                     onPress={() => {
+                                        // Construct the criteria string for display purposes
                                         const criteria = [
+                                            selectedUnit,
                                             selectedComponent,
                                             selectedArea,
                                             selectedHanger,
                                             selectedCoil,
                                             selectedPanel,
                                             selectedRow,
+                                            selectedTube,
+                                            selectedJoint,
+                                            selectedWelder,
                                         ]
                                             .filter(Boolean) // Remove any null or undefined values
                                             .join(', '); // Join them with a comma for better readability
 
                                         setFilterCriteria(criteria); // Set the concatenated string
-                                        setfilterModalVisible(false);
-                                    }}
 
+                                        // Construct the query params object for fetchData
+                                        const queryParams = {
+                                            unit_number: selectedUnit || undefined,
+                                            component_name: selectedComponent || undefined,
+                                            area: selectedArea || undefined,
+                                            hanger_number: selectedHanger || undefined,
+                                            coil_number: selectedCoil || undefined,
+                                            panel_number: selectedPanel || undefined,
+                                            row_number: selectedRow || undefined,
+                                            tube_number: selectedTube || undefined,
+                                            joint_number: selectedJoint || undefined,
+                                            weldersl: selectedWelder || undefined,
+                                        };
+
+                                        // Remove any keys with undefined values
+                                        const filteredParams = Object.fromEntries(
+                                            Object.entries(queryParams).filter(([_, v]) => v != null)
+                                        );
+
+                                        console.log("Filtered Params:", filteredParams); // Debugging filtered params
+
+                                        // Call fetchData with filtered query params
+                                        fetchData(filteredParams);
+
+                                        setfilterModalVisible(false); // Close the modal
+                                    }}
                                 >
                                     <Text style={styles.buttonText}>Submit</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
+
                 </View>
             </Modal>
 

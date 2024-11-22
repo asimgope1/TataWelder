@@ -26,7 +26,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { useFocusEffect } from '@react-navigation/native';
 import { BASE_URL } from '../../constants/url';
 import { POSTNETWORK } from '../../utils/Network';
-import { storeObjByKey } from '../../utils/Storage';
+import { clearAll, storeObjByKey } from '../../utils/Storage';
 import Alertmodal from '../../components/Alertmodal/Alertmodal';
 import Exitmodal from '../../components/Exitmodal';
 import { BG, LOGO, TATA } from '../../constants/imagepath';
@@ -85,11 +85,11 @@ const Login = ({ navigation, route }) => {
       .then(res => {
         console.log('response', res);
         if (res?.token) {
-          storeObjByKey('loginResponse', res).then(() => {
-            // navigation.navigate('DashBoard');
-            dispatch(checkuserToken());
+          storeObjByKey('loginResponse', res)
 
-          });
+          dispatch(checkuserToken());
+
+          // });
         } else {
           setLoader(false);
           alert('Invalid credentials');
@@ -284,7 +284,11 @@ const Login = ({ navigation, route }) => {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  // onPress={() => navigation.navigate('ForgotPassword')}
+                  onPress={() => {
+                    // clearAll()
+                    // dispatch(checkuserToken())
+
+                  }}
                   style={{
                     width: WIDTH * 0.9,
                     height: HEIGHT * 0.05,

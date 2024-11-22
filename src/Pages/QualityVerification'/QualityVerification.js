@@ -11,6 +11,7 @@ import {
     TouchableOpacity,
     Modal,
     TextInput,
+    RefreshControl,
 } from "react-native";
 import React, { Fragment, useEffect, useState } from "react";
 import { BRAND, GRAY, WHITE } from "../../constants/color";
@@ -22,6 +23,7 @@ import { BAS_URL } from "../../constants/url";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Calendar } from "react-native-calendars";
 import { Icon } from "react-native-elements";
+import { pick } from "react-native-document-picker";
 
 const QualityVerification = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -30,10 +32,21 @@ const QualityVerification = ({ navigation }) => {
     const [reportNumber, setReportNumber] = useState('');
     const [reportDate, setReportDate] = useState('');
     const [reportTime, setReportTime] = useState('');
+    const [SelectedJob, setSelectedJob] = useState(null);
 
     const [filterCriteria, setFilterCriteria] = useState('');
 
     const [filtermodalVisible, setfilterModalVisible] = useState(false); // State for modal visibility
+
+    const [refreshing, setRefreshing] = useState(false); // Refresh state to manage data refreshing
+    const refresh = async () => {
+        setRefreshing(true);
+        fetchData();
+
+
+        setRefreshing(false);
+    };
+
 
 
 
@@ -67,6 +80,8 @@ const QualityVerification = ({ navigation }) => {
             setSelectedCoil(null)
             setSelectedPanel(null)
             setSelectedRow(null)
+
+            fetchData()
             console.log('Filter cleared');
         }
     };
@@ -114,6 +129,13 @@ const QualityVerification = ({ navigation }) => {
     const [welderOpen, setWelderOpen] = useState(false);
 
     // Fetch data when the component mounts
+
+
+
+
+
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -160,25 +182,55 @@ const QualityVerification = ({ navigation }) => {
             // see error handling
         }
     };
+
     const handleApiCall = async () => {
         if (selectedFile) {
-            // Simulating an API call with the selected file data
             try {
-                const response = await fetch('https://your-api-endpoint.com/upload', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        fileName: selectedFile.name,
-                        fileUri: selectedFile.uri,
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                // Create a new instance of Headers and add the Authorization token
+                const myHeaders = new Headers();
+                myHeaders.append("Authorization", "Token 92acb7775672549a1ce35c3f4c211538d8dee4bf");
+
+                // Create a FormData object and append necessary fields
+                const formData = new FormData();
+                formData.append("sl", SelectedJob);
+                formData.append("report_number", reportNumber);
+                formData.append("report_date", startDate);
+                // Append the selected file to the form data
+                formData.append("file", {
+                    uri: selectedFile.uri,
+                    name: selectedFile.name,
+                    type: selectedFile.type || "application/octet-stream", // Default MIME type if not provided
                 });
+                console.log('formData', formData)
+                // Construct request options
+                const requestOptions = {
+                    method: "POST",
+                    headers: myHeaders,
+                    body: formData,
+                    redirect: "follow",
+                };
+
+                // Make the API call
+                const response = await fetch(`${BAS_URL}/welding/api/v1/qualityinspection-assignment/`, requestOptions);
                 const result = await response.json();
-                console.log('API Response:', result);
+                setModalVisible(false)
+                console.log("API Response:", result);
+                if (result.status === "error") {
+                    setReportDate('');
+                    setReportNumber('');
+                    setSelectedFile(null);
+                    fetchData();
+                    alert(`Error: ${result.errors.error || result.message}`);
+                } else {
+                    alert(`Success: ${JSON.stringify(result.data.message)}`);
+                }
             } catch (error) {
-                console.error('Error in API call:', error);
+                alert('Error in API call:', error);
+                console.error("Error in API call:", error);
             }
+        } else {
+            setModalVisible(false)
+            console.warn("No file selected.");
         }
     };
 
@@ -186,28 +238,72 @@ const QualityVerification = ({ navigation }) => {
 
 
 
-    // Fetch API data
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true)
-            const url = `${BAS_URL}welding/api/v1/to-be-qualityinspection-list/`;
-            GETNETWORK(url, true).then(
-                (response) => {
-                    if (response.status === 'success') {
-                        setData(response.data)
-                        console.log('data', response);
-                        setLoading(false);
-                        // SetJobList(response.data);
-                    } else {
-                        setLoading(false);
-                        console.log('Error:', response.message);
-                    }
+
+    const fetchData = async (params = {}) => {
+        setLoading(true);
+
+        // Base URL
+        const url = `${BAS_URL}welding/api/v1/to-be-qualityinspection-list/`;
+
+        // Check if there are any query params in the `params` object
+        const queryString = Object.keys(params).length
+            ? `?${new URLSearchParams(params).toString()}`
+            : ''; // Construct query string
+
+        // Final URL with or without query parameters
+        const finalUrl = `${url}${queryString}`;
+
+        console.log("Final URL:", finalUrl); // Debug: Check constructed URL
+
+        // Fetch data using GETNETWORK with the constructed URL
+        GETNETWORK(finalUrl, true)
+            .then((response) => {
+                if (response.status === 'success') {
+                    setData(response.data);
+                    console.log('PAUTReport', response);
+
+                    // Reset selected filters after data is fetched
+                    // setSelectedUnit(null);
+                    // setSelectedComponent(null);
+                    // setSelectedArea(null);
+                    // setSelectedHanger(null);
+                    // setSelectedCoil(null);
+                    // setSelectedPanel(null);
+                    // setSelectedRow(null);
+                    // setSelectedTube(null);
+                    // setSelectedJoint(null);
+                    // setSelectedWelder(null);
+                    setLoading(false);
+                } else {
+                    // Reset selected filters in case of error
+                    setLoading(false);
+                    setSelectedUnit(null);
+                    setSelectedComponent(null);
+                    setSelectedArea(null);
+                    setSelectedHanger(null);
+                    setSelectedCoil(null);
+                    setSelectedPanel(null);
+                    setSelectedRow(null);
+                    setSelectedTube(null);
+                    setSelectedJoint(null);
+                    setSelectedWelder(null);
+                    console.log('Error:', response.message);
                 }
-            );
-        };
+            })
+            .catch((error) => {
+                setLoading(false);
+                console.error('Fetch Error:', error);
+            });
+    };
+
+
+    useEffect(() => {
 
         fetchData();
     }, []);
+
+    // Fetch API data
+
 
     const renderItem = ({ item }) => (
         <View
@@ -225,23 +321,50 @@ const QualityVerification = ({ navigation }) => {
             <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
                 Job Number: {item.job_number}
             </Text>
-            <Text style={{ fontSize: 14, color: '#555' }}>
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
                 Component Name: {item.component_name}
             </Text>
-            <Text style={{ fontSize: 14, color: '#555' }}>
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
                 Unit Number: {item.unit_number}
             </Text>
-            <Text style={{ fontSize: 14, color: '#555' }}>
-                Joint Number: {item.joint_number}
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
+                Tube Joints : {item.tube_joints}
             </Text>
-            <Text style={{ fontSize: 12, color: '#888' }}>
-                Description Number: {item.job_desc_number || 'N/A'}
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
+                Job Description Number: {item.job_desc_number}
             </Text>
-
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
+                Job Offer Date: {item.job_offer_date}
+            </Text>
             <TouchableOpacity
 
                 onPress={() => {
-                    // setSelectedJob(item.sl);
+                    setSelectedJob(item.sl);
                     setModalVisible(true);
                 }}
                 style={{
@@ -342,6 +465,14 @@ const QualityVerification = ({ navigation }) => {
                                 </View>
 
                                 <FlatList
+
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={refresh}
+                                        />
+                                    }
+
                                     data={data}
                                     keyExtractor={(item, index) => index.toString()}
                                     renderItem={renderItem}
@@ -456,7 +587,12 @@ const QualityVerification = ({ navigation }) => {
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.cancelButton]}
-                                    onPress={() => setModalVisible(false)}
+                                    onPress={() => {
+                                        setReportDate('');
+                                        setReportNumber('');
+                                        setSelectedFile(null);
+                                        setModalVisible(false)
+                                    }}
                                 >
                                     <Text style={styles.buttonText}>Cancel</Text>
                                 </TouchableOpacity>
@@ -464,7 +600,10 @@ const QualityVerification = ({ navigation }) => {
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.submitButton]}
-                                    onPress={() => setModalVisible(false)}
+                                    onPress={() => {
+                                        handleApiCall()
+                                        setModalVisible(false)
+                                    }}
                                 >
                                     <Text style={styles.buttonText}>Submit</Text>
                                 </TouchableOpacity>
@@ -474,6 +613,7 @@ const QualityVerification = ({ navigation }) => {
                 </View>
             </Modal>
 
+
             <Modal
                 visible={filtermodalVisible}
                 animationType="slide"
@@ -481,12 +621,12 @@ const QualityVerification = ({ navigation }) => {
                 onRequestClose={() => setfilterModalVisible(false)}
             >
                 <View style={styles.modalBackdrop}>
-                    <View style={styles.modalContainer}>
+                    <ScrollView contentContainerStyle={styles.modalContainer} >
                         <Text style={styles.modalTitle}>Filter</Text>
 
+                        {/* Unit Dropdown */}
 
-
-
+                        <Text style={styles.dropdownHeader}>Unit</Text>
                         <DropDownPicker
                             searchable={true}
                             open={unitOpen}
@@ -500,8 +640,8 @@ const QualityVerification = ({ navigation }) => {
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
 
-
-
+                        {/* Component Dropdown */}
+                        <Text style={styles.dropdownHeader}>Component</Text>
                         <DropDownPicker
                             searchable={true}
                             open={componentOpen}
@@ -516,6 +656,7 @@ const QualityVerification = ({ navigation }) => {
                         />
 
                         {/* Area Dropdown */}
+                        <Text style={styles.dropdownHeader}>Area</Text>
                         <DropDownPicker
                             searchable={true}
                             open={areaOpen}
@@ -530,6 +671,7 @@ const QualityVerification = ({ navigation }) => {
                         />
 
                         {/* Hanger Dropdown */}
+                        <Text style={styles.dropdownHeader}>Hanger</Text>
                         <DropDownPicker
                             searchable={true}
                             open={hangerOpen}
@@ -542,6 +684,9 @@ const QualityVerification = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 900 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Coil Dropdown */}
+                        <Text style={styles.dropdownHeader}>Coil</Text>
                         <DropDownPicker
                             searchable={true}
                             open={coilOpen}
@@ -554,6 +699,9 @@ const QualityVerification = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 800 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Panel Dropdown */}
+                        <Text style={styles.dropdownHeader}>Panel</Text>
                         <DropDownPicker
                             searchable={true}
                             open={panelOpen}
@@ -566,6 +714,9 @@ const QualityVerification = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 700 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Row Dropdown */}
+                        <Text style={styles.dropdownHeader}>Row</Text>
                         <DropDownPicker
                             searchable={true}
                             open={rowOpen}
@@ -579,6 +730,8 @@ const QualityVerification = ({ navigation }) => {
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
 
+                        {/* Tube Dropdown */}
+                        <Text style={styles.dropdownHeader}>Tube</Text>
                         <DropDownPicker
                             searchable={true}
                             open={tubeOpen}
@@ -591,6 +744,9 @@ const QualityVerification = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 500 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Joint Dropdown */}
+                        <Text style={styles.dropdownHeader}>Joint</Text>
                         <DropDownPicker
                             searchable={true}
                             open={jointOpen}
@@ -603,6 +759,9 @@ const QualityVerification = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 400 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+                        {/* Welder Dropdown */}
+                        <Text style={styles.dropdownHeader}>Welder</Text>
                         <DropDownPicker
                             searchable={true}
                             open={welderOpen}
@@ -611,7 +770,7 @@ const QualityVerification = ({ navigation }) => {
                             setOpen={setWelderOpen}
                             setValue={setSelectedWelder}
                             setItems={setwelderItems}
-                            placeholder="Select welder"
+                            placeholder="Select Welder"
                             style={{ ...styles.dropdown, zIndex: 300 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
@@ -624,8 +783,6 @@ const QualityVerification = ({ navigation }) => {
                                 justifyContent: 'space-evenly',
                             }}
                         >
-
-
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.cancelButton]}
@@ -638,27 +795,57 @@ const QualityVerification = ({ navigation }) => {
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.submitButton]}
                                     onPress={() => {
+                                        // Construct the criteria string for display purposes
                                         const criteria = [
+                                            selectedUnit,
                                             selectedComponent,
                                             selectedArea,
                                             selectedHanger,
                                             selectedCoil,
                                             selectedPanel,
                                             selectedRow,
+                                            selectedTube,
+                                            selectedJoint,
+                                            selectedWelder,
                                         ]
                                             .filter(Boolean) // Remove any null or undefined values
                                             .join(', '); // Join them with a comma for better readability
 
                                         setFilterCriteria(criteria); // Set the concatenated string
-                                        setfilterModalVisible(false);
-                                    }}
 
+                                        // Construct the query params object for fetchData
+                                        const queryParams = {
+                                            unit_number: selectedUnit || undefined,
+                                            component_name: selectedComponent || undefined,
+                                            area: selectedArea || undefined,
+                                            hanger_number: selectedHanger || undefined,
+                                            coil_number: selectedCoil || undefined,
+                                            panel_number: selectedPanel || undefined,
+                                            row_number: selectedRow || undefined,
+                                            tube_number: selectedTube || undefined,
+                                            joint_number: selectedJoint || undefined,
+                                            weldersl: selectedWelder || undefined,
+                                        };
+
+                                        // Remove any keys with undefined values
+                                        const filteredParams = Object.fromEntries(
+                                            Object.entries(queryParams).filter(([_, v]) => v != null)
+                                        );
+
+                                        console.log("Filtered Params:", filteredParams); // Debugging filtered params
+
+                                        // Call fetchData with filtered query params
+                                        fetchData(filteredParams);
+
+                                        setfilterModalVisible(false); // Close the modal
+                                    }}
                                 >
                                     <Text style={styles.buttonText}>Submit</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
-                    </View>
+                    </ScrollView>
+
                 </View>
             </Modal>
 
@@ -698,6 +885,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+        alignSelf: 'center'
     },
     modalTitle: {
         fontSize: 20,
@@ -819,6 +1007,12 @@ const styles = StyleSheet.create({
     },
     dropdownContainer: {
         borderColor: '#ccc',
+    },
+    dropdownHeader: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        marginBottom: 8,
+        color: '#333', // Adjust color as needed
     },
     previewContainer: {
         width: '100%',

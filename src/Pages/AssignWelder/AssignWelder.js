@@ -1,6 +1,6 @@
-import { View, Text, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView, FlatList, TouchableOpacity, Modal, Button, StyleSheet, TextInput } from 'react-native';
+import { View, Text, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView, FlatList, TouchableOpacity, Modal, Button, StyleSheet, RefreshControl } from 'react-native';
 import React, { Fragment, useEffect, useState } from 'react';
-import { BLACK, BRAND, WHITE } from '../../constants/color';
+import { BLACK, BRAND } from '../../constants/color';
 import Header from '../../components/Header';
 import { MyStatusBar } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
@@ -8,120 +8,25 @@ import { GETNETWORK, POSTNETWORK } from '../../utils/Network'; // Assuming you h
 import { BAS_URL } from '../../constants/url';
 import DropDownPicker from 'react-native-dropdown-picker'; // Import DropDownPicker
 import { useFocusEffect } from '@react-navigation/native';
-import { styles } from '../TPI/TPI';
-import { Icon } from 'react-native-elements';
 
 const AssignWelder = ({ navigation }) => {
     // State to store the welder list
     const [welderList, setWelderList] = useState([]);
     const [loading, setLoading] = useState(true); // State for loading indicator
     const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
-    const [selectedWelderr, setSelectedWelderr] = useState(null); // State for selected welder
+    const [selectedWelder, setSelectedWelder] = useState(null); // State for selected welder
     const [availableWelders, setAvailableWelders] = useState([]); // State for available welders from API
     const [open, setOpen] = useState(false); // State for dropdown open status
     const [items, setItems] = useState([]); // State for dropdown items
     const [selectedJob, setSelectedJob] = useState(''); // State for selected job
 
-
-
-
-
-
-    const [filterCriteria, setFilterCriteria] = useState('');
-
-    const [filtermodalVisible, setfilterModalVisible] = useState(false); // State for modal visibility
-
-
-
-
-
-    const handleFilter = (type) => {
-        if (type === 'select') {
-            setfilterModalVisible(!filtermodalVisible);; // Open the modal when "Select Filter" is tapped
-        } else if (type === 'clear') {
-            // Handle filter clear action
-            setFilterCriteria('')
-            setSelectedComponent(null);
-            setSelectedArea(null);
-            setSelectedHanger(null);
-            setSelectedCoil(null)
-            setSelectedPanel(null)
-            setSelectedRow(null)
-            console.log('Filter cleared');
-        }
+    const [refreshing, setRefreshing] = useState(false); // Refresh state to manage data refreshing
+    const refresh = async () => {
+        setRefreshing(true);
+        fetchWelderList();
+        fetchAvailableWelders(); // Fetch available welders to assign
+        setRefreshing(false);
     };
-
-
-
-    const [unitItems, setUnitItems] = useState([]);
-    const [selectedUnit, setSelectedUnit] = useState(null);
-    const [unitOpen, setUnitOpen] = useState(false);
-
-    const [componentItems, setComponentItems] = useState([]);
-    const [selectedComponent, setSelectedComponent] = useState(null);
-    const [componentOpen, setComponentOpen] = useState(false);
-
-    const [areaItems, setAreaItems] = useState([]);
-    const [selectedArea, setSelectedArea] = useState(null);
-    const [areaOpen, setAreaOpen] = useState(false);
-
-    const [hangerItems, setHangerItems] = useState([]);
-    const [selectedHanger, setSelectedHanger] = useState(null);
-    const [hangerOpen, setHangerOpen] = useState(false);
-
-    const [coilItems, setCoilItems] = useState([]);
-    const [selectedCoil, setSelectedCoil] = useState(null);
-    const [coilOpen, setCoilOpen] = useState(false);
-
-    const [panelItems, setPanelItems] = useState([]);
-    const [selectedPanel, setSelectedPanel] = useState(null);
-    const [panelOpen, setPanelOpen] = useState(false);
-
-    const [rowItems, setRowItems] = useState([]);
-    const [selectedRow, setSelectedRow] = useState(null);
-    const [rowOpen, setRowOpen] = useState(false);
-
-    const [tubeItems, setTubeItems] = useState([]);
-    const [selectedTube, setSelectedTube] = useState(null);
-    const [tubeOpen, setTubeOpen] = useState(false);
-
-    const [jointItems, setJointItems] = useState([]);
-    const [selectedJoint, setSelectedJoint] = useState(null);
-    const [jointOpen, setJointOpen] = useState(false);
-
-    const [welderItems, setwelderItems] = useState([]);
-    const [selectedWelder, setSelectedWelder] = useState(null);
-    const [welderOpen, setWelderOpen] = useState(false);
-
-    // Fetch data when the component mounts
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const url = `${BAS_URL}welding/api/v1/query/filters/`;
-                const response = await GETNETWORK(url, true); // Use GETNETWORK instead of fetch
-
-                if (response.status === "success") {
-                    // Update state with API data
-                    setUnitItems(response.data.unit.map(([id, label]) => ({ label, value: id })));
-                    setComponentItems(response.data.components.map((component) => ({ label: component, value: component })));
-                    setAreaItems(response.data.areas.map((area) => ({ label: area, value: area })));
-                    setHangerItems(response.data.hangers.map((hanger) => ({ label: hanger, value: hanger })));
-                    setCoilItems(response.data.coil_number.map((coil) => ({ label: coil, value: coil })));
-                    setPanelItems(response.data.panel_number.map((panel) => ({ label: panel, value: panel })));
-                    setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
-                    setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
-                    setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
-                    setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
-                } else {
-                    console.log("Error fetching data:", response.message);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-
-        fetchData();
-    }, []);
 
 
 
@@ -210,19 +115,44 @@ const AssignWelder = ({ navigation }) => {
                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
                     Job Number: {item.job_number}
                 </Text>
-                <Text style={{ fontSize: 14, color: '#555' }}>
+                <Text style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: 4,
+                }}>
                     Component Name: {item.component_name}
                 </Text>
-                <Text style={{ fontSize: 14, color: '#555' }}>
+                <Text style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: 4,
+                }}>
                     Unit Number: {item.unit_number}
                 </Text>
-                <Text style={{ fontSize: 14, color: '#555' }}>
+                <Text style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: 4,
+                }}>
                     Joint Number: {item.joint_number}
                 </Text>
-                <Text style={{ fontSize: 12, color: '#888' }}>
+                <Text style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: 4,
+                }}>
                     Job Description Number: {item.job_desc_number}
                 </Text>
-                <Text style={{ fontSize: 12, color: '#888' }}>
+                <Text style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: 4,
+                }}>
                     Job Offer Date: {item.job_offer_date}
                 </Text>
 
@@ -242,7 +172,7 @@ const AssignWelder = ({ navigation }) => {
                         marginTop: 10,
                     }}
                 >
-                    <Text style={styless.buttonText}>Assign Welder</Text>
+                    <Text style={styles.buttonText}>Assign Welder</Text>
                 </TouchableOpacity>
 
             </View>
@@ -258,14 +188,14 @@ const AssignWelder = ({ navigation }) => {
 
     // Function to handle assigning welder using POSTNETWORK
     const handleAssignWelder = async () => {
-        console.log('sl', selectedJob, 'selectedWelder', selectedWelderr);
+        console.log('sl', selectedJob, 'selectedWelder', selectedWelder);
 
-        if (selectedWelderr) {
+        if (selectedWelder) {
             try {
                 // Create the payload object
                 const payload = {
                     sl: parseInt(selectedJob), // Converts selectedJob to an integer
-                    weldersl: selectedWelderr,
+                    weldersl: selectedWelder,
                 };
 
                 // Use POSTNETWORK to send the POST request
@@ -277,7 +207,16 @@ const AssignWelder = ({ navigation }) => {
 
                 // Log the response
                 console.log('Assignment Response:', response);
-                fetchWelderList()
+                if (response.status === 'success') {
+                    alert('Welder assigned successfully!', response.message);
+
+                    fetchWelderList()
+                } else {
+                    alert('Error assigning welder:', response.message);
+
+                    fetchWelderList()
+                }
+
 
                 // Close the modal after successful assignment
                 setModalVisible(false);
@@ -314,76 +253,26 @@ const AssignWelder = ({ navigation }) => {
                         />
 
                         {/* Welder List Display */}
-                        <View style={{ width: '100%', paddingHorizontal: 5, }}>
+                        <View style={{ width: '100%', paddingHorizontal: 10, marginTop: 20 }}>
                             {loading ? (
                                 <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginTop: 20 }}>
                                     Loading welders...
                                 </Text>
                             ) : (
-                                <>
+                                <FlatList
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={refresh}
+                                        />
 
-                                    <View style={styles.filterContainer}>
-                                        {/* Left side content, 70% width */}
-                                        <View style={styles.leftContent}>
-                                            {/* <TouchableOpacity style={styles.filterButton}> */}
-                                            <TextInput
-                                                style={styles.filterTextInput}
-                                                placeholder="Enter Filter Criteria"
-                                                placeholderTextColor="#888"
-                                                value={filterCriteria}
-                                                editable={false}
-                                                multiline
-                                            // onChangeText={(text) => setFilterCriteria(text)}
-                                            />
-                                            {/* </TouchableOpacity> */}
-                                        </View>
-
-                                        {/* Right side buttons, 30% width */}
-                                        <View style={styles.rightButtons}>
-                                            <TouchableOpacity
-                                                style={styles.selectButton}
-                                                onPress={() => handleFilter('select')}
-                                            > <Icon
-                                                    name={'filter-alt'}
-                                                    type='material'
-                                                    color={WHITE}
-                                                    size={24}
-                                                    containerStyle={{ marginBottom: 5 }}
-                                                />
-                                                <Text style={{
-                                                    color: '#fff',
-                                                    fontSize: 12,
-                                                    fontWeight: 'bold',
-                                                }}>Filter</Text>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity
-                                                style={{ ...styles.clearButton, backgroundColor: filterCriteria.length > 0 ? '#FF6347' : '#4CAF50' }}
-                                                onPress={() => handleFilter('clear')}
-                                            >
-                                                <Icon
-                                                    name={'delete'}
-                                                    type='material'
-                                                    color={WHITE}
-                                                    size={24}
-                                                    containerStyle={{ marginBottom: 5 }}
-                                                />
-                                                <Text style={{
-                                                    color: '#fff',
-                                                    fontSize: 12,
-                                                    fontWeight: 'bold',
-                                                }}>Clear </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                    <FlatList
-                                        data={welderList}
-                                        renderItem={renderWelderItem}
-                                        keyExtractor={(item, index) => index.toString()}
-                                        contentContainerStyle={{ paddingBottom: 20 }}
-                                        ListEmptyComponent={renderEmptyComponent} // Component to show when the list is empty
-                                    />
-                                </>
+                                    }
+                                    data={welderList}
+                                    renderItem={renderWelderItem}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    contentContainerStyle={{ paddingBottom: 20 }}
+                                    ListEmptyComponent={renderEmptyComponent} // Component to show when the list is empty
+                                />
                             )}
                         </View>
                     </ScrollView>
@@ -396,33 +285,33 @@ const AssignWelder = ({ navigation }) => {
                     transparent={true}
                     onRequestClose={() => setModalVisible(false)}
                 >
-                    <View style={styless.modalBackdrop}>
-                        <View style={styless.modalContainer}>
-                            <Text style={styless.modalTitle}>Assign Welder</Text>
+                    <View style={styles.modalBackdrop}>
+                        <View style={styles.modalContainer}>
+                            <Text style={styles.modalTitle}>Assign Welder</Text>
 
                             {/* DropDownPicker for welder selection */}
                             <DropDownPicker
                                 searchable={true}
                                 open={open}
-                                value={selectedWelderr}
+                                value={selectedWelder}
                                 items={items}
                                 setOpen={setOpen}
-                                setValue={setSelectedWelderr}
+                                setValue={setSelectedWelder}
                                 setItems={setItems}
                                 placeholder="Select Welder"
-                                style={styless.dropdownStyle}
-                                textStyle={styless.dropdownTextStyle}
-                                dropDownStyle={styless.dropdownListStyle}
+                                style={styles.dropdownStyle}
+                                textStyle={styles.dropdownTextStyle}
+                                dropDownStyle={styles.dropdownListStyle}
                             />
 
-                            <View style={styless.buttonContainer}>
+                            <View style={styles.buttonContainer}>
 
-                                <TouchableOpacity style={styless.assignButton} onPress={handleAssignWelder}>
-                                    <Text style={styless.buttonText}>Assign Welder</Text>
+                                <TouchableOpacity style={styles.assignButton} onPress={handleAssignWelder}>
+                                    <Text style={styles.buttonText}>Assign Welder</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styless.cancelButton} onPress={() => setModalVisible(false)}>
-                                    <Text style={styless.buttonText}>Cancel</Text>
+                                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                                    <Text style={styles.buttonText}>Cancel</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -430,200 +319,13 @@ const AssignWelder = ({ navigation }) => {
                 </Modal>
 
             </SafeAreaView>
-            <Modal
-                visible={filtermodalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setfilterModalVisible(false)}
-            >
-                <View style={styles.modalBackdrop}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Filter</Text>
-
-
-
-
-                        <DropDownPicker
-                            searchable={true}
-                            open={unitOpen}
-                            value={selectedUnit}
-                            items={unitItems}
-                            setOpen={setUnitOpen}
-                            setValue={setSelectedUnit}
-                            setItems={setUnitItems}
-                            placeholder="Select Unit"
-                            style={{ ...styles.dropdown, zIndex: 1200 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-
-
-                        <DropDownPicker
-                            searchable={true}
-                            open={componentOpen}
-                            value={selectedComponent}
-                            items={componentItems}
-                            setOpen={setComponentOpen}
-                            setValue={setSelectedComponent}
-                            setItems={setComponentItems}
-                            placeholder="Select Component"
-                            style={{ ...styles.dropdown, zIndex: 1100 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        {/* Area Dropdown */}
-                        <DropDownPicker
-                            searchable={true}
-                            open={areaOpen}
-                            value={selectedArea}
-                            items={areaItems}
-                            setOpen={setAreaOpen}
-                            setValue={setSelectedArea}
-                            setItems={setAreaItems}
-                            placeholder="Select Area"
-                            style={{ ...styles.dropdown, zIndex: 1000 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        {/* Hanger Dropdown */}
-                        <DropDownPicker
-                            searchable={true}
-                            open={hangerOpen}
-                            value={selectedHanger}
-                            items={hangerItems}
-                            setOpen={setHangerOpen}
-                            setValue={setSelectedHanger}
-                            setItems={setHangerItems}
-                            placeholder="Select Hanger"
-                            style={{ ...styles.dropdown, zIndex: 900 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={coilOpen}
-                            value={selectedCoil}
-                            items={coilItems}
-                            setOpen={setCoilOpen}
-                            setValue={setSelectedCoil}
-                            setItems={setCoilItems}
-                            placeholder="Select Coil"
-                            style={{ ...styles.dropdown, zIndex: 800 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={panelOpen}
-                            value={selectedPanel}
-                            items={panelItems}
-                            setOpen={setPanelOpen}
-                            setValue={setSelectedPanel}
-                            setItems={setPanelItems}
-                            placeholder="Select Panel"
-                            style={{ ...styles.dropdown, zIndex: 700 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={rowOpen}
-                            value={selectedRow}
-                            items={rowItems}
-                            setOpen={setRowOpen}
-                            setValue={setSelectedRow}
-                            setItems={setRowItems}
-                            placeholder="Select Row"
-                            style={{ ...styles.dropdown, zIndex: 600 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        <DropDownPicker
-                            searchable={true}
-                            open={tubeOpen}
-                            value={selectedTube}
-                            items={tubeItems}
-                            setOpen={setTubeOpen}
-                            setValue={setSelectedTube}
-                            setItems={setTubeItems}
-                            placeholder="Select Tube"
-                            style={{ ...styles.dropdown, zIndex: 500 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={jointOpen}
-                            value={selectedJoint}
-                            items={jointItems}
-                            setOpen={setJointOpen}
-                            setValue={setSelectedJoint}
-                            setItems={setJointItems}
-                            placeholder="Select Joint"
-                            style={{ ...styles.dropdown, zIndex: 400 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={welderOpen}
-                            value={selectedWelder}
-                            items={welderItems}
-                            setOpen={setWelderOpen}
-                            setValue={setSelectedWelder}
-                            setItems={setwelderItems}
-                            placeholder="Select welder"
-                            style={{ ...styles.dropdown, zIndex: 300 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        {/* Buttons */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                width: '100%',
-                                justifyContent: 'space-evenly',
-                            }}
-                        >
-
-
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, styles.cancelButton]}
-                                    onPress={() => setfilterModalVisible(false)}
-                                >
-                                    <Text style={styles.buttonText}>Cancel</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, styles.submitButton]}
-                                    onPress={() => {
-                                        const criteria = [
-                                            selectedComponent,
-                                            selectedArea,
-                                            selectedHanger,
-                                            selectedCoil,
-                                            selectedPanel,
-                                            selectedRow,
-                                        ]
-                                            .filter(Boolean) // Remove any null or undefined values
-                                            .join(', '); // Join them with a comma for better readability
-
-                                        setFilterCriteria(criteria); // Set the concatenated string
-                                        setfilterModalVisible(false);
-                                    }}
-
-                                >
-                                    <Text style={styles.buttonText}>Submit</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
         </Fragment>
     );
 };
 
 export default AssignWelder;
 
-const styless = StyleSheet.create({
+const styles = StyleSheet.create({
     modalBackdrop: {
         flex: 1,
         justifyContent: 'center',

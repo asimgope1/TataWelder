@@ -8,194 +8,146 @@ import {
     FlatList,
     TouchableOpacity,
     ActivityIndicator,
-    TextInput,
-    Modal,
+    Alert,
+    RefreshControl,
 } from 'react-native';
 import React, { Fragment, useEffect, useState } from 'react';
-import { BRAND, RED, WHITE } from '../../constants/color';
+import { BRAND, RED } from '../../constants/color';
 import Header from '../../components/Header';
 import { HEIGHT, MyStatusBar } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
 import { GETNETWORK, POSTNETWORK } from '../../utils/Network';
 import { BAS_URL } from '../../constants/url';
 import { Icon } from 'react-native-elements';
-import { styles } from '../TPI/TPI';
-import DropDownPicker from 'react-native-dropdown-picker';
 
 const JobApproval = ({ navigation }) => {
     const [JobList, SetJobList] = useState([]);
     const [loading, setLoading] = useState(true); // Loading state to manage data fetching
-
-    const [filterCriteria, setFilterCriteria] = useState('');
-
-    const [filtermodalVisible, setfilterModalVisible] = useState(false); // State for modal visibility
-
-
-
-
-
-    const handleFilter = (type) => {
-        if (type === 'select') {
-            setfilterModalVisible(!filtermodalVisible);; // Open the modal when "Select Filter" is tapped
-        } else if (type === 'clear') {
-            // Handle filter clear action
-            setFilterCriteria('')
-            setSelectedComponent(null);
-            setSelectedArea(null);
-            setSelectedHanger(null);
-            setSelectedCoil(null)
-            setSelectedPanel(null)
-            setSelectedRow(null)
-            console.log('Filter cleared');
-        }
+    const [refreshing, setRefreshing] = useState(false); // Refresh state to manage data refreshing
+    const refresh = async () => {
+        setRefreshing(true);
+        await GetJobList();
+        setRefreshing(false);
     };
 
-
-
-    const [unitItems, setUnitItems] = useState([]);
-    const [selectedUnit, setSelectedUnit] = useState(null);
-    const [unitOpen, setUnitOpen] = useState(false);
-
-    const [componentItems, setComponentItems] = useState([]);
-    const [selectedComponent, setSelectedComponent] = useState(null);
-    const [componentOpen, setComponentOpen] = useState(false);
-
-    const [areaItems, setAreaItems] = useState([]);
-    const [selectedArea, setSelectedArea] = useState(null);
-    const [areaOpen, setAreaOpen] = useState(false);
-
-    const [hangerItems, setHangerItems] = useState([]);
-    const [selectedHanger, setSelectedHanger] = useState(null);
-    const [hangerOpen, setHangerOpen] = useState(false);
-
-    const [coilItems, setCoilItems] = useState([]);
-    const [selectedCoil, setSelectedCoil] = useState(null);
-    const [coilOpen, setCoilOpen] = useState(false);
-
-    const [panelItems, setPanelItems] = useState([]);
-    const [selectedPanel, setSelectedPanel] = useState(null);
-    const [panelOpen, setPanelOpen] = useState(false);
-
-    const [rowItems, setRowItems] = useState([]);
-    const [selectedRow, setSelectedRow] = useState(null);
-    const [rowOpen, setRowOpen] = useState(false);
-
-    const [tubeItems, setTubeItems] = useState([]);
-    const [selectedTube, setSelectedTube] = useState(null);
-    const [tubeOpen, setTubeOpen] = useState(false);
-
-    const [jointItems, setJointItems] = useState([]);
-    const [selectedJoint, setSelectedJoint] = useState(null);
-    const [jointOpen, setJointOpen] = useState(false);
-
-    const [welderItems, setwelderItems] = useState([]);
-    const [selectedWelder, setSelectedWelder] = useState(null);
-    const [welderOpen, setWelderOpen] = useState(false);
-
-    // Fetch data when the component mounts
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const url = `${BAS_URL}welding/api/v1/query/filters/`;
-                const response = await GETNETWORK(url, true); // Use GETNETWORK instead of fetch
-
-                if (response.status === "success") {
-                    // Update state with API data
-                    setUnitItems(response.data.unit.map(([id, label]) => ({ label, value: id })));
-                    setComponentItems(response.data.components.map((component) => ({ label: component, value: component })));
-                    setAreaItems(response.data.areas.map((area) => ({ label: area, value: area })));
-                    setHangerItems(response.data.hangers.map((hanger) => ({ label: hanger, value: hanger })));
-                    setCoilItems(response.data.coil_number.map((coil) => ({ label: coil, value: coil })));
-                    setPanelItems(response.data.panel_number.map((panel) => ({ label: panel, value: panel })));
-                    setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
-                    setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
-                    setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
-                    setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
-                } else {
-                    console.log("Error fetching data:", response.message);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-
-
-
-
-
-
-
-
-
     const handleApproval = async (item) => {
-        const payload = {
-            "jobsl": item.jobsl,  // Use the jobsl from the selected item
-            "approved_status": "Approved"
-        };
+        // Show confirmation alert before proceeding with the approval
+        Alert.alert(
+            'Confirm Approval', // Title of the alert
+            'Are you sure you want to approve this job?', // Message to display
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Approve',
+                    onPress: async () => {
+                        const payload = {
+                            jobsl: item.jobsl,  // Use the jobsl from the selected item
+                            approved_status: 'Approved',
+                        };
 
-        // The API endpoint URL
-        const url = `${BAS_URL}welding/jobmaster/update-job/`;
+                        // The API endpoint URL
+                        const url = `${BAS_URL}welding/jobmaster/update-job/`;
 
-        try {
-            // Make the POST request using POSTNETWORK
-            const response = await POSTNETWORK(url, payload, true); // Assuming `true` for token if it's needed
+                        try {
+                            // Make the POST request using POSTNETWORK
+                            const response = await POSTNETWORK(url, payload, true); // Assuming `true` for token if it's needed
 
-            console.log('Cancel Result:', response);
+                            console.log('Approval Result:', response);
 
-            if (response.status === 'success') {
-                // Handle a successful cancellation
-                GetJobList();
-                alert('Job successfully Approved');
-                // Optionally, refresh the job list to update the UI
-                // GetJobList();
-            } else {
-                alert('Failed to Approved the job');
-            }
-        } catch (error) {
-            console.error('Cancel Error:', error);
-            alert('An error occurred while Approving the job');
-        }
+                            if (response.status === 'success') {
+                                // Handle a successful approval
+                                GetJobList();
+                                alert('Job successfully Approved');
+                                // Optionally, refresh the job list to update the UI
+                            } else {
+                                alert('Failed to approve the job');
+                            }
+                        } catch (error) {
+                            console.error('Approval Error:', error);
+                            alert('An error occurred while approving the job');
+                        }
+                    },
+                },
+            ],
+            { cancelable: true } // Allow the user to dismiss the alert without making a choice
+        );
     };
 
     const handleCancel = async (item) => {
-        // The payload for the cancel request
-        const payload = {
-            "jobsl": item.jobsl,  // Use the jobsl from the selected item
-            "approved_status": "Cancelled"
-        };
+        // Show confirmation alert before proceeding with the cancellation
+        Alert.alert(
+            'Confirm Cancellation', // Title of the alert
+            'Are you sure you want to cancel this job?', // Message to display
+            [
+                {
+                    text: 'No', // Button text
+                    style: 'cancel', // Button style, does nothing when pressed
+                },
+                {
+                    text: 'Yes, Cancel',
+                    onPress: async () => {
+                        const payload = {
+                            jobsl: item.jobsl,  // Use the jobsl from the selected item
+                            approved_status: 'Cancelled',
+                        };
 
-        // The API endpoint URL
-        const url = `${BAS_URL}welding/jobmaster/update-job/`;
+                        // The API endpoint URL
+                        const url = `${BAS_URL}welding/jobmaster/update-job/`;
 
-        try {
-            // Make the POST request using POSTNETWORK
-            const response = await POSTNETWORK(url, payload, true); // Assuming `true` for token if it's needed
+                        try {
+                            // Make the POST request using POSTNETWORK
+                            const response = await POSTNETWORK(url, payload, true); // Assuming `true` for token if it's needed
 
-            console.log('Cancel Result:', response);
+                            console.log('Cancel Result:', response);
 
-            if (response.status === 'success') {
-                // Handle a successful cancellation
-                GetJobList();
-                alert('Job successfully cancelled');
-                // Optionally, refresh the job list to update the UI
-                // GetJobList();
-            } else {
-                alert('Failed to cancel the job');
-            }
-        } catch (error) {
-            console.error('Cancel Error:', error);
-            alert('An error occurred while cancelling the job');
-        }
+                            if (response.status === 'success') {
+                                // Handle a successful cancellation
+                                GetJobList();
+                                alert('Job successfully cancelled');
+                                // Optionally, refresh the job list to update the UI
+                            } else {
+                                alert('Failed to cancel the job');
+                            }
+                        } catch (error) {
+                            console.error('Cancel Error:', error);
+                            alert('An error occurred while cancelling the job');
+                        }
+                    },
+                },
+            ],
+            { cancelable: true } // Allow the user to dismiss the alert without making a choice
+        );
     };
 
     useEffect(() => {
         GetJobList();
     }, []);
 
+    const styles = {
+        cardTitle: {
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: '#333',
+            marginBottom: 4,
+        },
+        cardSubtitle: {
+            fontSize: 14,
+            color: '#555',
+            marginBottom: 4,
+        },
+        cardDate: {
+            fontSize: 12,
+            color: '#888',
+        },
+        buttonText: {
+            color: 'white',
+            fontWeight: '600',
+            textAlign: 'center',
+        },
+    };
 
     const GetJobList = async () => {
         const url = `${BAS_URL}welding/jobmaster/joblist/`;
@@ -232,6 +184,8 @@ const JobApproval = ({ navigation }) => {
                     shadowOpacity: 0.2,
                     shadowRadius: 2,
                     elevation: 2,
+                    borderLeftColor: 'orange',
+                    borderLeftWidth: 4,
                 }}
             >
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
@@ -246,10 +200,12 @@ const JobApproval = ({ navigation }) => {
 
                     {/* Job Description Section */}
                     <View style={{ flex: 1 }}>
-                        <Text style={styless.cardTitle}>Job Number: {item.job_number}</Text>
-                        <Text style={styless.cardSubtitle}>Job Desc: {item.job_desc_number}</Text>
-                        <Text style={styless.cardDate}>Job Date: {item.job_offer_date}</Text>
-                        <Text style={styless.cardDate}>Unit Number: {item.unit_number}</Text>
+                        <Text style={styles.cardTitle}>Job Number: {item.job_number}</Text>
+                        <Text style={styles.cardTitle}>component Name: {item.component_name}</Text>
+                        <Text style={styles.cardTitle}>Unit Number: {item.unit_number}</Text>
+                        <Text style={styles.cardTitle}>Tube Joints: {item.tube_joints}</Text>
+                        <Text style={styles.cardTitle}>Job Description Number: {item.job_desc_number}</Text>
+                        <Text style={styles.cardTitle}>Job Date: {item.job_offer_date}</Text>
                     </View>
                 </View>
 
@@ -272,7 +228,7 @@ const JobApproval = ({ navigation }) => {
                         }}
                         onPress={() => handleApproval(item)}
                     >
-                        <Text style={styless.buttonText}>Approve</Text>
+                        <Text style={styles.buttonText}>Approve</Text>
                     </TouchableOpacity>
 
                     {/* Cancel Button */}
@@ -317,70 +273,30 @@ const JobApproval = ({ navigation }) => {
                             {loading ? (
                                 <ActivityIndicator size="large" color={BRAND} />
                             ) : (
-
                                 <>
 
-                                    <View style={styles.filterContainer}>
-                                        {/* Left side content, 70% width */}
-                                        <View style={styles.leftContent}>
-                                            {/* <TouchableOpacity style={styles.filterButton}> */}
-                                            <TextInput
-                                                style={styles.filterTextInput}
-                                                placeholder="Enter Filter Criteria"
-                                                placeholderTextColor="#888"
-                                                value={filterCriteria}
-                                                editable={false}
-                                                multiline
-                                            // onChangeText={(text) => setFilterCriteria(text)}
-                                            />
-                                            {/* </TouchableOpacity> */}
-                                        </View>
-
-                                        {/* Right side buttons, 30% width */}
-                                        <View style={styles.rightButtons}>
-                                            <TouchableOpacity
-                                                style={styles.selectButton}
-                                                onPress={() => handleFilter('select')}
-                                            > <Icon
-                                                    name={'filter-alt'}
-                                                    type='material'
-                                                    color={WHITE}
-                                                    size={24}
-                                                    containerStyle={{ marginBottom: 5 }}
-                                                />
-                                                <Text style={{
-                                                    color: '#fff',
-                                                    fontSize: 12,
-                                                    fontWeight: 'bold',
-                                                }}>Filter</Text>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity
-                                                style={{ ...styles.clearButton, backgroundColor: filterCriteria.length > 0 ? '#FF6347' : '#4CAF50' }}
-                                                onPress={() => handleFilter('clear')}
-                                            >
-                                                <Icon
-                                                    name={'delete'}
-                                                    type='material'
-                                                    color={WHITE}
-                                                    size={24}
-                                                    containerStyle={{ marginBottom: 5 }}
-                                                />
-                                                <Text style={{
-                                                    color: '#fff',
-                                                    fontSize: 12,
-                                                    fontWeight: 'bold',
-                                                }}>Clear </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
                                     <FlatList
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={refresh}
+                                            />
+
+                                        }
                                         data={JobList}
                                         renderItem={renderItem}
                                         keyExtractor={(item, index) => index.toString()}
                                         contentContainerStyle={{ paddingTop: 10 }}
                                         ListFooterComponent={
                                             <View style={{ height: HEIGHT * 0.05 }} />
+                                        }
+
+                                        ListEmptyComponent={
+                                            <View style={{
+                                                flex: 1, justifyContent: 'center', alignItems: 'center'
+                                            }}>
+                                                <Text>No Jobs Available</Text>
+                                            </View>
                                         }
                                     />
                                 </>
@@ -391,220 +307,8 @@ const JobApproval = ({ navigation }) => {
             </SafeAreaView>
 
 
-            <Modal
-                visible={filtermodalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setfilterModalVisible(false)}
-            >
-                <View style={styles.modalBackdrop}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Filter</Text>
-
-
-
-
-                        <DropDownPicker
-                            searchable={true}
-                            open={unitOpen}
-                            value={selectedUnit}
-                            items={unitItems}
-                            setOpen={setUnitOpen}
-                            setValue={setSelectedUnit}
-                            setItems={setUnitItems}
-                            placeholder="Select Unit"
-                            style={{ ...styles.dropdown, zIndex: 1200 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-
-
-                        <DropDownPicker
-                            searchable={true}
-                            open={componentOpen}
-                            value={selectedComponent}
-                            items={componentItems}
-                            setOpen={setComponentOpen}
-                            setValue={setSelectedComponent}
-                            setItems={setComponentItems}
-                            placeholder="Select Component"
-                            style={{ ...styles.dropdown, zIndex: 1100 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        {/* Area Dropdown */}
-                        <DropDownPicker
-                            searchable={true}
-                            open={areaOpen}
-                            value={selectedArea}
-                            items={areaItems}
-                            setOpen={setAreaOpen}
-                            setValue={setSelectedArea}
-                            setItems={setAreaItems}
-                            placeholder="Select Area"
-                            style={{ ...styles.dropdown, zIndex: 1000 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        {/* Hanger Dropdown */}
-                        <DropDownPicker
-                            searchable={true}
-                            open={hangerOpen}
-                            value={selectedHanger}
-                            items={hangerItems}
-                            setOpen={setHangerOpen}
-                            setValue={setSelectedHanger}
-                            setItems={setHangerItems}
-                            placeholder="Select Hanger"
-                            style={{ ...styles.dropdown, zIndex: 900 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={coilOpen}
-                            value={selectedCoil}
-                            items={coilItems}
-                            setOpen={setCoilOpen}
-                            setValue={setSelectedCoil}
-                            setItems={setCoilItems}
-                            placeholder="Select Coil"
-                            style={{ ...styles.dropdown, zIndex: 800 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={panelOpen}
-                            value={selectedPanel}
-                            items={panelItems}
-                            setOpen={setPanelOpen}
-                            setValue={setSelectedPanel}
-                            setItems={setPanelItems}
-                            placeholder="Select Panel"
-                            style={{ ...styles.dropdown, zIndex: 700 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={rowOpen}
-                            value={selectedRow}
-                            items={rowItems}
-                            setOpen={setRowOpen}
-                            setValue={setSelectedRow}
-                            setItems={setRowItems}
-                            placeholder="Select Row"
-                            style={{ ...styles.dropdown, zIndex: 600 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        <DropDownPicker
-                            searchable={true}
-                            open={tubeOpen}
-                            value={selectedTube}
-                            items={tubeItems}
-                            setOpen={setTubeOpen}
-                            setValue={setSelectedTube}
-                            setItems={setTubeItems}
-                            placeholder="Select Tube"
-                            style={{ ...styles.dropdown, zIndex: 500 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={jointOpen}
-                            value={selectedJoint}
-                            items={jointItems}
-                            setOpen={setJointOpen}
-                            setValue={setSelectedJoint}
-                            setItems={setJointItems}
-                            placeholder="Select Joint"
-                            style={{ ...styles.dropdown, zIndex: 400 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={welderOpen}
-                            value={selectedWelder}
-                            items={welderItems}
-                            setOpen={setWelderOpen}
-                            setValue={setSelectedWelder}
-                            setItems={setwelderItems}
-                            placeholder="Select welder"
-                            style={{ ...styles.dropdown, zIndex: 300 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        {/* Buttons */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                width: '100%',
-                                justifyContent: 'space-evenly',
-                            }}
-                        >
-
-
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, styles.cancelButton]}
-                                    onPress={() => setfilterModalVisible(false)}
-                                >
-                                    <Text style={styles.buttonText}>Cancel</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, styles.submitButton]}
-                                    onPress={() => {
-                                        const criteria = [
-                                            selectedComponent,
-                                            selectedArea,
-                                            selectedHanger,
-                                            selectedCoil,
-                                            selectedPanel,
-                                            selectedRow,
-                                        ]
-                                            .filter(Boolean) // Remove any null or undefined values
-                                            .join(', '); // Join them with a comma for better readability
-
-                                        setFilterCriteria(criteria); // Set the concatenated string
-                                        setfilterModalVisible(false);
-                                    }}
-
-                                >
-                                    <Text style={styles.buttonText}>Submit</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
         </Fragment>
     );
 };
 
 export default JobApproval;
-
-
-const styless = {
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 4,
-    },
-    cardSubtitle: {
-        fontSize: 14,
-        color: '#555',
-        marginBottom: 4,
-    },
-    cardDate: {
-        fontSize: 12,
-        color: '#888',
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-};
-

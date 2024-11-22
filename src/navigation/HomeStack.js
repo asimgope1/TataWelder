@@ -14,6 +14,8 @@ import FinalApproval from '../Pages/FinalApproval/FinalApproval';
 import CustomDrawerContent from './CustomDrawerContent';
 import { WIDTH } from '../constants/config';
 import AssignWelder from '../Pages/AssignWelder/AssignWelder';
+import LoginStack from './LoginStack';
+import Login from '../Pages/Login';
 
 
 const Stack = createNativeStackNavigator();
@@ -52,6 +54,11 @@ const HomeStack = () => {
         <Stack.Screen
           name="Drawer"
           component={DrawerNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="LoginStack"
+          component={LoginStack}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

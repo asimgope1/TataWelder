@@ -75,13 +75,29 @@ const NewJob = ({ navigation }) => {
         rt_required: false,
         paut_required: false,
         job_details: "",
-        tube_joints: '',
+        tube_joints: "",
         job_desc_number: "",
         offer_date: startDate,
     });
     const [startDate, setStartDate] = useState(
         new Date().toISOString().slice(0, 10)
     );
+
+    useEffect(() => {
+        setFormData((prevData) => ({
+            ...prevData,
+            tube_joints: `${prevData.tube_number} ${prevData.joint_number}`,
+            job_desc_number: `${prevData.area} ${prevData.hanger_number} ${prevData.panel_number} ${prevData.row_number}`,
+        }));
+    }, [
+        formData.tube_number,
+        formData.joint_number,
+        formData.area,
+        formData.hanger_number,
+        formData.panel_number,
+        formData.row_number,
+    ]);
+
     const [showModal, setShowModal] = useState(false);
 
 
@@ -679,7 +695,7 @@ const NewJob = ({ navigation }) => {
                                             <TextInput
                                                 style={styles.textInput}
                                                 value={`${formData.tube_number} ${formData.joint_number}`}
-                                                onChangeText={text => handleInputChange('tube_joints', text)}
+                                                onChangeText={text => handleInputChange('tube_joints', `${formData.tube_number} ${formData.joint_number}`)}
                                                 placeholder="Enter Tube Joints"
                                                 keyboardType="numeric"
                                                 editable={false}
@@ -691,7 +707,7 @@ const NewJob = ({ navigation }) => {
                                             <TextInput
                                                 style={[styles.textInput, styles.disabledInput]}
                                                 value={`${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number}`}
-                                                onChangeText={text => handleInputChange('job_desc_number', `${tubeItems}+${jointItems}`)}
+                                                onChangeText={text => handleInputChange('job_desc_number', `${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number}`)}
                                                 editable={false} // Disabled field
                                             />
                                         </View>

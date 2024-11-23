@@ -87,7 +87,7 @@ const NewJob = ({ navigation }) => {
         setFormData((prevData) => ({
             ...prevData,
             tube_joints: `${prevData.tube_number} ${prevData.joint_number}`,
-            job_desc_number: `${prevData.area} ${prevData.hanger_number} ${prevData.panel_number} ${prevData.row_number}`,
+            job_desc_number: `${prevData.area} ${prevData.hanger_number} ${prevData.coil_number} ${prevData.panel_number} ${prevData.row_number}`,
         }));
     }, [
         formData.tube_number,
@@ -96,6 +96,8 @@ const NewJob = ({ navigation }) => {
         formData.hanger_number,
         formData.panel_number,
         formData.row_number,
+        formData.coil_number,
+
     ]);
 
     const [showModal, setShowModal] = useState(false);
@@ -167,12 +169,16 @@ const NewJob = ({ navigation }) => {
                     setUnitItems(
                         response.data.unit_number.map(item => ({ label: item, value: item })),
                     );
-                    setcomponentItems(
-                        response.data.component_name.map(item => ({
-                            label: item,
-                            value: item,
-                        })),
-                    );
+                    setcomponentItems([]);
+                    setAreaItems([]);
+                    setHangerItems([]);
+                    setCoilItems([]);
+                    setPanelItems([]);
+                    setRowItems([]);
+                    setTubeItems([]);
+                    setJointItems([]);
+
+
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -182,7 +188,7 @@ const NewJob = ({ navigation }) => {
         };
 
         fetchDropdownData();
-    }, [formData]);
+    }, [navigation]);
 
     const handleInputChange = (field, value) => {
         setFormData(prevData => ({ ...prevData, [field]: value }));
@@ -219,6 +225,7 @@ const NewJob = ({ navigation }) => {
                 navigation.navigate('DashBoard');
             } else {
                 Alert.alert('Error', response?.errors?.error || 'Failed to create job');
+                resetForm()
             }
         } catch (error) {
             console.error('Error during form submission:', error);
@@ -260,24 +267,24 @@ const NewJob = ({ navigation }) => {
 
             if (response.status === 'success') {
                 // console.log('for areaSelect', response);
-                setHangerItems(
-                    response.data.hanger_number.map(item => ({ label: item, value: item })),
-                );
-                setCoilItems(
-                    response.data.coil_number.map(item => ({ label: item, value: item })),
-                );
-                setPanelItems(
-                    response.data.panel_number.map(item => ({ label: item, value: item })),
-                );
-                setRowItems(
-                    response.data.row_number.map(item => ({ label: item, value: item })),
-                )
-                setTubeItems(
-                    response.data.tube_number.map(item => ({ label: item, value: item })),
-                );
-                setJointItems(
-                    response.data.joint_number.map(item => ({ label: item, value: item })),
-                );
+                // setHangerItems(
+                //     response.data.hanger_number.map(item => ({ label: item, value: item })),
+                // );
+                // setCoilItems(
+                //     response.data.coil_number.map(item => ({ label: item, value: item })),
+                // );
+                // setPanelItems(
+                //     response.data.panel_number.map(item => ({ label: item, value: item })),
+                // );
+                // setRowItems(
+                //     response.data.row_number.map(item => ({ label: item, value: item })),
+                // )
+                // setTubeItems(
+                //     response.data.tube_number.map(item => ({ label: item, value: item })),
+                // );
+                // setJointItems(
+                //     response.data.joint_number.map(item => ({ label: item, value: item })),
+                // );
 
 
             }
@@ -370,21 +377,78 @@ const NewJob = ({ navigation }) => {
 
 
 
-
-    const componentSelect = async value => {
-        // console.log('value-componentSelect', value);
+    const UnitSelect = async value => {
+        console.log('here')
 
         try {
             const response = await GETNETWORK(
-                `${BAS_URL}welding/jobmaster/create-job/?component_name=${value}`,
+                `${BAS_URL}welding/jobmaster/create-job/?unit_number=${value}`,
                 true,
             );
 
             if (response.status === 'success') {
-                // console.log('for area', response);
-                setAreaItems(
-                    response.data.area.map(item => ({ label: item, value: item })),
+                // console.log('UnitSelect ', response);
+
+                setcomponentItems(
+                    response.data.component_name.map(item => ({ label: item, value: item })),
                 );
+                setAreaItems([]);
+                setHangerItems([]);
+                setCoilItems([]);
+                setPanelItems([]);
+                setRowItems([]);
+                setTubeItems([]);
+                setJointItems([]);
+
+
+
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+
+    }
+
+
+    const componentSelect = async value => {
+        console.log('value-componentSelect', formData.unit_number);
+
+        try {
+            // Fetching data from API based on selected unit_number and component_name
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?unit_number=${formData.unit_number}&component_name=${value}`,
+                true,
+            );
+
+            if (response.status === 'success') {
+                console.log('componentSelect', response);
+
+                // Setting state for each dropdown item based on the API response
+                setAreaItems(
+                    response.data.area.map(item => ({ label: item, value: item }))
+                );
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item }))
+                );
+                setCoilItems(
+                    response.data.coil_number.map(item => ({ label: item, value: item }))
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item }))
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item }))
+                );
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item }))
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item }))
+                );
+            } else {
+                console.error('Failed to fetch data:', response.message);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -392,6 +456,7 @@ const NewJob = ({ navigation }) => {
             setLoading(false);
         }
     };
+
 
     console.log('form', formData)
 
@@ -466,6 +531,10 @@ const NewJob = ({ navigation }) => {
                                                 setValue={callback => {
                                                     const value = callback();
                                                     handleInputChange('unit_number', value);
+                                                }}
+                                                onSelectItem={item => {
+                                                    // console.log('item', item);
+                                                    UnitSelect(item?.value);
                                                 }}
                                                 placeholder="Select Unit"
                                                 style={styles.dropdownStyle}

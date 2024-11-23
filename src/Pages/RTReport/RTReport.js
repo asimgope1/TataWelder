@@ -25,6 +25,7 @@ import { Icon } from "react-native-elements";
 import DropDownPicker from "react-native-dropdown-picker";
 import { pick, keepLocalCopy, DocumentPicker } from "react-native-document-picker";
 import { Calendar } from "react-native-calendars";
+import { getObjByKey } from "../../utils/Storage";
 
 const RTReport = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -93,6 +94,17 @@ const RTReport = ({ navigation }) => {
 
 
 
+
+    const [Token, SetToken] = useState('');
+
+    const GetToken = async () => {
+        const Token = await getObjByKey('loginResponse');
+        console.log('token: ' + Token.token);
+        SetToken(Token?.token);
+    }
+
+
+
     const [unitItems, setUnitItems] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState(null);
     const [unitOpen, setUnitOpen] = useState(false);
@@ -135,6 +147,7 @@ const RTReport = ({ navigation }) => {
 
     // Fetch data when the component mounts
     useEffect(() => {
+        GetToken();
         const fetchData = async () => {
             try {
                 const url = `${BAS_URL}welding/api/v1/query/filters/`;
@@ -187,7 +200,7 @@ const RTReport = ({ navigation }) => {
             try {
                 // Create a new instance of Headers and add the Authorization token
                 const myHeaders = new Headers();
-                myHeaders.append("Authorization", "Token 92acb7775672549a1ce35c3f4c211538d8dee4bf");
+                myHeaders.append("Authorization", `Token ${Token}`);
 
                 // Create a FormData object and append necessary fields
                 const formData = new FormData();
@@ -210,7 +223,7 @@ const RTReport = ({ navigation }) => {
                 };
 
                 // Make the API call
-                const response = await fetch(`${BAS_URL}/welding/api/v1/rt-assignment/`, requestOptions);
+                const response = await fetch(`${BAS_URL}welding/api/v1/rt-assignment/`, requestOptions);
                 const result = await response.json();
                 setModalVisible(false)
                 console.log("API Response:", result);
@@ -222,6 +235,7 @@ const RTReport = ({ navigation }) => {
                     alert(`Error: ${result.errors.error || result.message}`);
                 } else {
                     alert(`Success: ${JSON.stringify(result.data.message)}`);
+                    fetchData();
                     setReportDate('');
                     setReportNumber('');
                     setSelectedFile(null);
@@ -300,7 +314,7 @@ const RTReport = ({ navigation }) => {
     useEffect(() => {
 
         fetchData();
-    }, []);
+    }, [navigation]);
 
     const renderItem = ({ item }) => (
         <View
@@ -395,6 +409,7 @@ const RTReport = ({ navigation }) => {
                             flexGrow: 1,
                             paddingBottom: 20,
                         }}
+                        scrollEnabled={false}
                     >
                         <Header
                             onMenuPress={() => {
@@ -460,32 +475,50 @@ const RTReport = ({ navigation }) => {
                                     </View>
                                 </View>
 
-                                <FlatList
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={refresh}
-                                        />
+                                <View
+                                    style={{
+                                        height: HEIGHT * 0.8,
+                                        width: WIDTH,
+                                        alignSelf: 'center',
+                                    }}
+                                >
 
-                                    }
-                                    data={data}
-                                    keyExtractor={(item, index) => index.toString()}
-                                    renderItem={renderItem}
-                                    contentContainerStyle={{ paddingBottom: 20 }}
-                                    ListEmptyComponent={
-                                        <View style={{
-                                            flex: 1,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            alignSelf: 'center'
-                                        }}>
-                                            <Text style={styles.emptyListText}>
-                                                No data available
-                                            </Text>
 
-                                        </View>
-                                    }
-                                />
+                                    <FlatList
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={refresh}
+                                            />
+
+                                        }
+                                        data={data}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        renderItem={renderItem}
+                                        ListFooterComponent={
+                                            <View style={{ height: 100 }} />
+                                        }
+
+                                        ListEmptyComponent={
+                                            <View style={{
+                                                flex: 1,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                alignSelf: 'center'
+                                            }}>
+                                                <Text style={styles.emptyListText}>
+                                                    No data available
+                                                </Text>
+
+                                            </View>
+                                        }
+                                    />
+
+
+
+
+                                </View>
+
                             </>
                         )}
                     </ScrollView>

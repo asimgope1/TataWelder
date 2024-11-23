@@ -16,7 +16,7 @@ import {
 import React, { Fragment, useEffect, useState } from "react";
 import { BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
-import { HEIGHT, MyStatusBar } from "../../constants/config";
+import { HEIGHT, MyStatusBar, WIDTH } from "../../constants/config";
 import { appStyles } from "../../styles/AppStyles";
 import { GETNETWORK } from "../../utils/Network";
 import { BAS_URL } from "../../constants/url";
@@ -24,6 +24,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { Calendar } from "react-native-calendars";
 import { Icon } from "react-native-elements";
 import { pick } from "react-native-document-picker";
+import { getObjByKey } from "../../utils/Storage";
 
 const QualityVerification = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -132,11 +133,19 @@ const QualityVerification = ({ navigation }) => {
 
 
 
+    const [Token, SetToken] = useState('');
+
+    const GetToken = async () => {
+        const Token = await getObjByKey('loginResponse');
+        console.log('token: ' + Token.token);
+        SetToken(Token?.token);
+    }
 
 
 
 
     useEffect(() => {
+        GetToken();
         const fetchData = async () => {
             try {
                 const url = `${BAS_URL}welding/api/v1/query/filters/`;
@@ -184,55 +193,51 @@ const QualityVerification = ({ navigation }) => {
     };
 
     const handleApiCall = async () => {
-        if (selectedFile) {
-            try {
-                // Create a new instance of Headers and add the Authorization token
-                const myHeaders = new Headers();
-                myHeaders.append("Authorization", "Token 92acb7775672549a1ce35c3f4c211538d8dee4bf");
+        try {
+            // Create a new instance of Headers and add the Authorization token
+            const myHeaders = new Headers();
+            myHeaders.append("Authorization", `Token ${Token}`);
+            myHeaders.append("Content-Type", "application/json");
 
-                // Create a FormData object and append necessary fields
-                const formData = new FormData();
-                formData.append("sl", SelectedJob);
-                formData.append("report_number", reportNumber);
-                formData.append("report_date", startDate);
-                // Append the selected file to the form data
-                formData.append("file", {
-                    uri: selectedFile.uri,
-                    name: selectedFile.name,
-                    type: selectedFile.type || "application/octet-stream", // Default MIME type if not provided
-                });
-                console.log('formData', formData)
-                // Construct request options
-                const requestOptions = {
-                    method: "POST",
-                    headers: myHeaders,
-                    body: formData,
-                    redirect: "follow",
-                };
+            // Prepare the JSON payload
+            const raw = JSON.stringify({
+                sl: SelectedJob,
+                contract_remark: reportNumber,
+            });
 
-                // Make the API call
-                const response = await fetch(`${BAS_URL}/welding/api/v1/qualityinspection-assignment/`, requestOptions);
-                const result = await response.json();
-                setModalVisible(false)
-                console.log("API Response:", result);
-                if (result.status === "error") {
-                    setReportDate('');
-                    setReportNumber('');
-                    setSelectedFile(null);
-                    fetchData();
-                    alert(`Error: ${result.errors.error || result.message}`);
-                } else {
-                    alert(`Success: ${JSON.stringify(result.data.message)}`);
-                }
-            } catch (error) {
-                alert('Error in API call:', error);
-                console.error("Error in API call:", error);
+            console.log('Raw JSON Payload:', raw);
+
+            // Construct request options
+            const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow",
+            };
+
+            // Make the API call
+            const response = await fetch(`${BAS_URL}welding/api/v1/qualityinspection-assignment/`, requestOptions);
+            const result = await response.json();
+            setModalVisible(false);
+            console.log("API Response:", result);
+
+            // Check the API response status
+            if (result.status === "error") {
+                setReportDate('');
+                setReportNumber('');
+                fetchData();
+                alert(`Error: ${result.errors.error || result.message}`);
+            } else {
+                fetchData();
+                alert(`Success: ${JSON.stringify(result.data.message)}`);
             }
-        } else {
-            setModalVisible(false)
-            console.warn("No file selected.");
+        } catch (error) {
+            alert('Error in API call:', error);
+            console.error("Error in API call:", error);
         }
     };
+
+
 
 
 
@@ -395,6 +400,7 @@ const QualityVerification = ({ navigation }) => {
                             flexGrow: 1,
                             paddingBottom: 20,
                         }}
+                        scrollEnabled={false}
                     >
                         <Header
                             onMenuPress={() => {
@@ -464,33 +470,47 @@ const QualityVerification = ({ navigation }) => {
                                     </View>
                                 </View>
 
-                                <FlatList
 
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={refresh}
-                                        />
-                                    }
+                                <View
+                                    style={{
+                                        height: HEIGHT * 0.8,
+                                        width: WIDTH,
+                                        alignSelf: 'center',
 
-                                    data={data}
-                                    keyExtractor={(item, index) => index.toString()}
-                                    renderItem={renderItem}
-                                    contentContainerStyle={{ paddingBottom: 20 }}
-                                    ListEmptyComponent={
-                                        <View style={{
-                                            flex: 1,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            alignSelf: 'center'
-                                        }}>
-                                            <Text style={styles.emptyListText}>
-                                                No data available
-                                            </Text>
+                                    }}
+                                >
 
-                                        </View>
-                                    }
-                                />
+                                    <FlatList
+
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={refresh}
+                                            />
+                                        }
+
+                                        data={data}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        renderItem={renderItem}
+                                        contentContainerStyle={{ paddingBottom: 20 }}
+                                        ListFooterComponent={
+                                            <View style={{ height: 100 }} />
+                                        }
+                                        ListEmptyComponent={
+                                            <View style={{
+                                                flex: 1,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                alignSelf: 'center'
+                                            }}>
+                                                <Text style={styles.emptyListText}>
+                                                    No data available
+                                                </Text>
+
+                                            </View>
+                                        }
+                                    />
+                                </View>
                             </>
                         )}
                     </ScrollView>
@@ -508,72 +528,19 @@ const QualityVerification = ({ navigation }) => {
 
                         {/* Input for Report Number */}
                         <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Report Number:</Text>
+                            <Text style={styles.inputLabel}>Remarks:</Text>
                             <TextInput
                                 style={styles.textInput}
                                 placeholder="Enter Report Number"
                                 value={reportNumber} // State value for report number
                                 onChangeText={(text) => setReportNumber(text)} // Update state
+                                multiline
                             />
                         </View>
 
-                        {/* Input for Report Date */}
-                        <TouchableOpacity
-                            onPress={() => {
-                                setShowModal(true);
-                            }}
-                            style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Report Date:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                placeholder="Enter Report Date (YYYY-MM-DD)"
-                                value={reportDate} // State value for report date
-                                onChangeText={(text) => setReportDate(text)} // Update state
-                                editable={false}
-                            />
-                        </TouchableOpacity>
-
-                        {/* Input for Report Time */}
 
 
 
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: GRAY,
-                                padding: 10,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-
-                            onPress={handleFilePick}
-                        >
-                            <Text style={{
-                                color: WHITE,
-                                fontSize: 16,
-                                fontWeight: 'bold',
-                            }}>Attach File</Text>
-
-                            <Icon
-                                name="attachment"
-                                size={25}
-                                style={{
-                                    marginLeft: 10,
-                                }}
-                            />
-
-                        </TouchableOpacity>
-
-                        {selectedFile && (
-                            <View style={styles.previewContainer}>
-                                <Text style={styles.previewText}>Selected File:</Text>
-                                <Text style={styles.previewText}>Name: {selectedFile.name}</Text>
-                                { }
-
-                                {/* <TouchableOpacity onPress={handleApiCall} style={styles.apiCallButton}>
-                                    <Text style={styles.emptyListText}>Send to API</Text>
-                                </TouchableOpacity> */}
-                            </View>
-                        )}
 
                         {/* Buttons */}
                         <View
@@ -904,6 +871,8 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     textInput: {
+
+        height: 100,
         width: '100%',
         borderWidth: 1,
         borderColor: '#ddd',

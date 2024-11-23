@@ -14,13 +14,14 @@ import {
 import React, { Fragment, useEffect, useState } from 'react';
 import { BRAND, RED, WHITE } from '../../constants/color';
 import Header from '../../components/Header';
-import { HEIGHT, MyStatusBar } from '../../constants/config';
+import { HEIGHT, MyStatusBar, WIDTH } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
 import { GETNETWORK, POSTNETWORK } from '../../utils/Network';
 import { BAS_URL } from '../../constants/url';
 import { Icon } from 'react-native-elements';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { styles } from '../TPI/TPI';
+import { RefreshControl } from 'react-native';
 
 const FinalApproval = ({ navigation }) => {
     const [JobList, SetJobList] = useState([]);
@@ -30,6 +31,18 @@ const FinalApproval = ({ navigation }) => {
     const [filterCriteria, setFilterCriteria] = useState('');
 
     const [filtermodalVisible, setfilterModalVisible] = useState(false); // State for modal visibility
+
+
+
+    const [refreshing, setRefreshing] = useState(false); // Refresh state to manage data refreshing
+    const refresh = async () => {
+        setRefreshing(true);
+        GetJobList();
+
+
+
+        setRefreshing(false);
+    };
 
 
 
@@ -127,13 +140,15 @@ const FinalApproval = ({ navigation }) => {
 
 
     const handleApproval = async (item) => {
+        console.log('i m here', item)
         const payload = {
-            "jobsl": item.jobsl,  // Use the jobsl from the selected item
+            "sl": item.sl,  // Use the jobsl from the selected item
             "approved_status": "Approved"
         };
+        console.log('payload', payload)
 
         // The API endpoint URL
-        const url = `${BAS_URL}welding/jobmaster/update-job/`;
+        const url = `${BAS_URL}welding/api/v1/finalapproval/`;
 
         try {
             // Make the POST request using POSTNETWORK
@@ -159,12 +174,12 @@ const FinalApproval = ({ navigation }) => {
     const handleCancel = async (item) => {
         // The payload for the cancel request
         const payload = {
-            "jobsl": item.jobsl,  // Use the jobsl from the selected item
+            "sl": item.sl,  // Use the jobsl from the selected item
             "approved_status": "Cancelled"
         };
 
         // The API endpoint URL
-        const url = `${BAS_URL}welding/jobmaster/update-job/`;
+        const url = `${BAS_URL}welding/api/v1/finalapproval/`;
 
         try {
             // Make the POST request using POSTNETWORK
@@ -194,7 +209,7 @@ const FinalApproval = ({ navigation }) => {
 
 
     const GetJobList = async () => {
-        const url = `${BAS_URL}welding/jobmaster/joblist/`;
+        const url = `${BAS_URL}welding/api/v1/finalapproval-list/`;
         setLoading(true); // Start loading
         try {
             const response = await GETNETWORK(url, true);
@@ -242,10 +257,32 @@ const FinalApproval = ({ navigation }) => {
 
                     {/* Job Description Section */}
                     <View style={{ flex: 1 }}>
-                        <Text style={styless.cardTitle}>Job Number: {item.job_number}</Text>
-                        <Text style={styless.cardSubtitle}>Job Desc: {item.job_desc_number}</Text>
-                        <Text style={styless.cardDate}>Job Date: {item.job_offer_date}</Text>
-                        <Text style={styless.cardDate}>Unit Number: {item.unit_number}</Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Job Number: {item.job_number}
+                        </Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Component Name: {item.component_name}
+                        </Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Unit Number: {item.unit_number}
+                        </Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Tube Joints: {item.tube_joints}
+                        </Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Job Description Number: {item.job_desc_number}
+                        </Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Job Offer Date: {item.job_offer_date}
+                        </Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Defect Name: {item.defect_name}
+                        </Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
+                            Job Status: {item.job_status}
+                        </Text>
+
+
                     </View>
                 </View>
 
@@ -303,10 +340,12 @@ const FinalApproval = ({ navigation }) => {
                             flexGrow: 1,
                             paddingBottom: 20,
                         }}
+                        scrollEnabled={false}
                     >
                         <Header
                             onMenuPress={() => navigation.toggleDrawer()}
                             title="Final-Approval"
+                        // onAddPress={() => navigation.navigate('AddJob')}
                         />
 
                         <View style={{ width: '100%', zIndex: 1000 }}>
@@ -369,15 +408,33 @@ const FinalApproval = ({ navigation }) => {
                                         </View>
                                     </View>
 
-                                    <FlatList
-                                        data={JobList}
-                                        renderItem={renderItem}
-                                        keyExtractor={(item, index) => index.toString()}
-                                        contentContainerStyle={{ paddingTop: 10 }}
-                                        ListFooterComponent={
-                                            <View style={{ height: HEIGHT * 0.05 }} />
-                                        }
-                                    />
+                                    <View
+                                        style={{
+                                            height: HEIGHT * 0.8,
+                                            width: WIDTH,
+                                            alignSelf: 'center',
+
+                                        }}
+                                    >
+
+                                        <FlatList
+
+                                            refreshControl={
+                                                <RefreshControl
+                                                    refreshing={refreshing}
+                                                    onRefresh={refresh}
+                                                />
+
+                                            }
+                                            data={JobList}
+                                            renderItem={renderItem}
+                                            keyExtractor={(item, index) => index.toString()}
+                                            contentContainerStyle={{ paddingTop: 10 }}
+                                            ListFooterComponent={
+                                                <View style={{ height: HEIGHT * 0.05 }} />
+                                            }
+                                        />
+                                    </View>
                                 </>
                             )}
                         </View>

@@ -15,7 +15,7 @@ import {
 import React, { Fragment, useEffect, useState } from "react";
 import { BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
-import { HEIGHT, MyStatusBar } from "../../constants/config";
+import { HEIGHT, MyStatusBar, WIDTH } from "../../constants/config";
 import { appStyles } from "../../styles/AppStyles";
 import { GETNETWORK } from "../../utils/Network";
 import { BAS_URL } from "../../constants/url";
@@ -24,6 +24,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { Calendar } from "react-native-calendars";
 import { RefreshControl } from "react-native";
 import { pick } from "react-native-document-picker";
+import { getObjByKey } from "../../utils/Storage";
 
 const PAUTReport = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -136,8 +137,18 @@ const PAUTReport = ({ navigation }) => {
     const [selectedWelder, setSelectedWelder] = useState(null);
     const [welderOpen, setWelderOpen] = useState(false);
 
+    const [Token, SetToken] = useState('');
+
+    const GetToken = async () => {
+        const Token = await getObjByKey('loginResponse');
+        console.log('token: ' + Token.token);
+        SetToken(Token?.token);
+    }
+
+
     // Fetch data when the component mounts
     useEffect(() => {
+        GetToken()
         const fetchData = async () => {
             try {
                 const url = `${BAS_URL}welding/api/v1/query/filters/`;
@@ -190,7 +201,7 @@ const PAUTReport = ({ navigation }) => {
             try {
                 // Create a new instance of Headers and add the Authorization token
                 const myHeaders = new Headers();
-                myHeaders.append("Authorization", "Token 92acb7775672549a1ce35c3f4c211538d8dee4bf");
+                myHeaders.append("Authorization", `Token ${Token}`);
 
                 // Create a FormData object and append necessary fields
                 const formData = new FormData();
@@ -213,7 +224,7 @@ const PAUTReport = ({ navigation }) => {
                 };
 
                 // Make the API call
-                const response = await fetch(`${BAS_URL}/welding/api/v1/paut-assignment/`, requestOptions);
+                const response = await fetch(`${BAS_URL}welding/api/v1/paut-assignment/`, requestOptions);
                 const result = await response.json();
                 setModalVisible(false)
                 console.log("API Response:", result);
@@ -225,6 +236,7 @@ const PAUTReport = ({ navigation }) => {
                     alert(`Error: ${result.errors.error || result.message}`);
                 } else {
                     alert(`Success: ${JSON.stringify(result.data.message)}`);
+                    fetchData();
                 }
             } catch (error) {
                 alert('Error in API call:', error);
@@ -300,7 +312,7 @@ const PAUTReport = ({ navigation }) => {
     useEffect(() => {
 
         fetchData();
-    }, []);
+    }, [navigation]);
 
 
 
@@ -399,6 +411,7 @@ const PAUTReport = ({ navigation }) => {
                             flexGrow: 1,
                             paddingBottom: 20,
                         }}
+                        scrollEnabled={false}
                     >
                         <Header
                             onMenuPress={() => {
@@ -466,34 +479,47 @@ const PAUTReport = ({ navigation }) => {
                                         </TouchableOpacity>
                                     </View>
                                 </View>
+                                <View
+                                    style={{
+                                        height: HEIGHT * 0.8,
+                                        width: WIDTH,
+                                        alignSelf: 'center',
+                                        // alignItems: 'center',
+                                    }}
+                                >
 
-                                <FlatList
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={refresh}
-                                        />
+                                    <FlatList
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={refresh}
+                                            />
 
-                                    }
-                                    data={data}
-                                    keyExtractor={(item, index) => index.toString()}
-                                    renderItem={renderItem}
-                                    contentContainerStyle={{ paddingBottom: 20 }}
-                                    ListEmptyComponent={
-                                        <View style={{
-                                            flex: 1,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            alignSelf: 'center'
-                                        }}>
-                                            <Text style={styles.emptyListText}>
-                                                No data available
-                                            </Text>
+                                        }
+                                        data={data}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        renderItem={renderItem}
+                                        contentContainerStyle={{ paddingBottom: 20 }}
+                                        ListFooterComponent={
+                                            <View style={{ height: 100 }} />
+                                        }
+                                        ListEmptyComponent={
+                                            <View style={{
+                                                flex: 1,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                alignSelf: 'center'
+                                            }}>
+                                                <Text style={styles.emptyListText}>
+                                                    No data available
+                                                </Text>
 
-                                        </View>
-                                    }
+                                            </View>
+                                        }
 
-                                />
+                                    />
+                                </View>
+
                             </>
                         )}
                     </ScrollView>

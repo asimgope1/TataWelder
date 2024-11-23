@@ -10,10 +10,10 @@ import { Icon } from 'react-native-elements';
 import { BAS_URL } from '../../constants/url';
 import { GETNETWORK } from '../../utils/Network';
 import { useFocusEffect } from '@react-navigation/native';
-import { BarChart, PieChart } from "react-native-gifted-charts";
 import { BOLD, EXTRABOLD, LIGHT, REGULAR, SEMIBOLD } from '../../constants/fontfamily';
 import { Loader } from '../../components/Loader';
 import { storeObjByKey } from '../../utils/Storage';
+import { PieChart } from 'react-native-chart-kit';
 
 const DashBoard = ({ navigation }) => {
 
@@ -128,6 +128,8 @@ const DashBoard = ({ navigation }) => {
 
     const renderStatusPieChart = () => {
         if (!dashboardData || !dashboardData.status_count) return null;
+
+        // Define the slice colors for each category
         const sliceColors = [
             '#FF5733', // Red-orange
             '#33FF57', // Green
@@ -141,52 +143,43 @@ const DashBoard = ({ navigation }) => {
             '#FF3333', // Red
         ];
 
+        // Prepare the data for the PieChart
         const pieData = dashboardData.status_count.map((status, index) => ({
-            value: status.count,
-            label: status.name,  // Using the name as the label for each slice
+            name: status.name,
+            population: status.count,
             color: sliceColors[index % sliceColors.length], // Cycle through the color list
+            legendFontColor: "#7F7F7F",
+            legendFontSize: 15,
         }));
 
+        // Chart configuration
+        const chartConfig = {
+            backgroundGradientFrom: "#1E2923",
+            backgroundGradientFromOpacity: 0,
+            backgroundGradientTo: "#08130D",
+            backgroundGradientToOpacity: 0.5,
+            color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+            strokeWidth: 2, // optional, default 3
+            barPercentage: 0.5,
+            useShadowColorFromDataset: false // optional
+        };
+
         return (
-            <View
-                style={{
-                    width: WIDTH * 0.9,
-                    alignSelf: 'center',
-                    alignItems: 'center',
-                }}
-            >
+            <View style={{
+                width: WIDTH,
+                alignSelf: 'center',
+                alignItems: 'center',
+            }}>
                 <PieChart
                     data={pieData}
-                    donut
-                    showText
-                    showValuesAsLabels
-                    innerCircleBorderWidth={6}
-                    innerCircleBorderColor="lightgray"
-                    textColor="white"
-                    radius={150}
-                    textSize={20}
-                    labelsPosition='outward'
-                    labelLineConfig={{
-                        stroke: '#333',
-                        strokeWidth: 2,
-                    }}
-                    LabelLineConfig={{
-                        length: 10,
-                        tailLength: 8,
-                        color: '#333', // using a custom color here
-                        thickness: 2,  // strokeWidth can be replaced with thickness
-                        labelComponentWidth: 20,
-                        labelComponentHeight: 10,
-                        labelComponentMargin: 4,
-                        avoidOverlappingOfLabels: true,
-                    }}
-                    extraRadius={15}
-                    externalLabelComponent={({ label, value, color }) => (
-                        <Text style={{ fontSize: 12, color }}>
-                            {`${label}: ${value}`}
-                        </Text>
-                    )}
-
+                    width={WIDTH * 0.9}
+                    height={220}
+                    chartConfig={chartConfig}
+                    accessor={"population"}
+                    backgroundColor={"transparent"}
+                    paddingLeft={"15"}
+                    center={[10, 0]} // Center the chart
+                    absolute // Show absolute values instead of percentages
                 />
             </View>
         );

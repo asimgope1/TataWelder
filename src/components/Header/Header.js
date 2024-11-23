@@ -6,6 +6,7 @@ import { MENU, PLUS } from '../../constants/imagepath'
 import { HEIGHT, WIDTH } from '../../constants/config'
 import { BLACK, BRAND, WHITE } from '../../constants/color'
 import { EXTRABOLD } from '../../constants/fontfamily'
+import { Icon } from 'react-native-elements'
 
 const Header = ({ title, onMenuPress, onAddPress }) => {
   return (
@@ -25,17 +26,32 @@ const Header = ({ title, onMenuPress, onAddPress }) => {
         </TouchableOpacity> : <></>}
 
         {/* Title */}
-        <Text style={styles.headerText}>
+        <Text style={{ ...styles.headerText, marginRight: onAddPress ? 0 : 30, }}>
           {title}
         </Text>
 
         {/* Add Icon */}
-        {onAddPress ? <TouchableOpacity onPress={onAddPress}>
-          <Image
-            style={styles.iconSmall}
-            source={PLUS}
-          />
-        </TouchableOpacity> : <></>}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '15%' }}>
+          {onAddPress ? (
+            <TouchableOpacity onPress={onAddPress}>
+              <Icon
+                name="check"         // Icon name, you can use any icon available in your library
+                type="font-awesome"  // Icon type, e.g., 'font-awesome', 'material', etc.
+                color="#4CAF50"      // Icon color, adjust as needed
+                size={24}            // Icon size, adjust as needed
+              />
+            </TouchableOpacity>
+          ) : null}
+
+          <TouchableOpacity>
+            {/* <Icon
+              name="times"         // Second icon name
+              type="font-awesome"  // Second icon type
+              color="#F44336"      // Second icon color
+              size={24}            // Second icon size
+            /> */}
+          </TouchableOpacity>
+        </View>
       </View>
     </LinearGradient>
   )
@@ -80,6 +96,6 @@ const styles = StyleSheet.create({
     fontFamily: EXTRABOLD,
     textAlign: 'center',
     flex: 1, // Ensures the title is centered
-    marginRight: 30, // Adjust margin to ensure space between icon and title
+    // Adjust margin to ensure space between icon and title
   },
 })

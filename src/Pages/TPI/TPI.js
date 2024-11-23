@@ -17,11 +17,11 @@ import { BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
 import { HEIGHT, MyStatusBar } from "../../constants/config";
 import { appStyles } from "../../styles/AppStyles";
-import { GETNETWORK } from "../../utils/Network";
+import { GETNETWORK, POSTNETWORK } from "../../utils/Network";
 import { BAS_URL } from "../../constants/url";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Calendar } from "react-native-calendars";
-import { Icon } from "react-native-elements";
+import { CheckBox, Icon } from "react-native-elements";
 
 const TPI = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -30,13 +30,19 @@ const TPI = ({ navigation }) => {
     const [reportNumber, setReportNumber] = useState('');
     const [reportDate, setReportDate] = useState('');
     const [reportTime, setReportTime] = useState('');
+    const [SelectedJob, setSelectedJob] = useState(null);
 
     const [filterCriteria, setFilterCriteria] = useState('');
 
     const [filtermodalVisible, setfilterModalVisible] = useState(false); // State for modal visibility
 
 
+    const [isChecked, setIsChecked] = useState(false);
 
+    // Function to handle checkbox press
+    const handleCheckBoxPress = () => {
+        setIsChecked(!isChecked); // Toggle the checkbox state
+    };
 
 
 
@@ -67,6 +73,7 @@ const TPI = ({ navigation }) => {
             setSelectedCoil(null)
             setSelectedPanel(null)
             setSelectedRow(null)
+
             console.log('Filter cleared');
         }
     };
@@ -113,6 +120,53 @@ const TPI = ({ navigation }) => {
     const [selectedWelder, setSelectedWelder] = useState(null);
     const [welderOpen, setWelderOpen] = useState(false);
 
+
+
+
+
+
+
+
+    const GetDefectStatus = async () => {
+        try {
+            // Use GETNETWORK to fetch data
+            const url = `${BAS_URL}welding/api/v1/defecttype-list/`;
+            const result = await GETNETWORK(url, true); // Assuming a token is required
+
+            // Check if the API call was successful
+            if (result.status === "success" && result.data && result.data.length > 0) {
+                // Destructure the data to get defect types and statuses
+                const { defect_type, status } = result.data[0];
+
+                // Set state with the fetched data
+                setDefectItems(defect_type.map((item) => ({ label: item, value: item })));
+                setJobStatusItems(status.map((item) => ({ label: item, value: item })));
+            } else {
+                console.error('Failed to fetch data:', result.errors || result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching defect and status data:', error);
+        }
+    };
+
+    // Fetch data when the component mounts
+    useEffect(() => {
+        GetDefectStatus();
+    }, []);
+
+
+    const [DefectItems, setDefectItems] = useState([]);
+    const [selectedDefect, setSelectedDefect] = useState(null);
+    const [DefectOpen, setDefectOpen] = useState(false);
+
+
+    const [JobStatusItems, setJobStatusItems] = useState([]);
+    const [selectedJobStatus, setSelectedJobStatus] = useState(null);
+    const [JobStatusOpen, setJobStatusOpen] = useState(false);
+
+
+
+
     // Fetch data when the component mounts
     useEffect(() => {
         const fetchData = async () => {
@@ -147,41 +201,43 @@ const TPI = ({ navigation }) => {
 
 
 
-    const [selectedFile, setSelectedFile] = useState(null);
 
-    const handleFilePick = async () => {
-        try {
-            // const [pickResult] = await pick()
-            const [pickResult] = await pick({ mode: 'import' }) // equivalent
-            console.log('picked one', pickResult)
-            setSelectedFile(pickResult)
-            // do something with the picked file
-        } catch (err) {
-            // see error handling
-        }
-    };
     const handleApiCall = async () => {
-        if (selectedFile) {
-            // Simulating an API call with the selected file data
-            try {
-                const response = await fetch('https://your-api-endpoint.com/upload', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        fileName: selectedFile.name,
-                        fileUri: selectedFile.uri,
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                const result = await response.json();
+        try {
+            // Logging the state variables for debugging
+            console.log('hhsd', SelectedJob, selectedDefect, selectedJobStatus, reportNumber, isChecked);
+
+            // Construct the payload using the current state
+            const payload = {
+                sl: SelectedJob,                // Use the selected job from state
+                defect_name: selectedDefect,    // Use the selected defect from state
+                tpi_remark: reportNumber,       // Use the report number from state
+                job_status: selectedJobStatus,  // Use the job status from state
+                check_shot: isChecked           // Use the checkbox state
+            };
+
+            // API endpoint
+            const url = `${BAS_URL}welding/api/v1/tpiinspection-assignment/`;
+
+            // Make the API call using POSTNETWORK
+            const result = await POSTNETWORK(url, payload, true); // Assume token is required
+
+            // Handle the response
+            if (result.status === 'error') {
+                console.error('Error in response:', result);
+                alert(`Error: ${result.errors?.error || result.message}`);
+                fetchData()
+            } else {
                 console.log('API Response:', result);
-            } catch (error) {
-                console.error('Error in API call:', error);
+                alert(`Success: ${JSON.stringify(result.data?.message || result.message)}`);
+                fetchData()
             }
+        } catch (error) {
+            // Catch and log any errors during the API call
+            console.error('Error in API call:', error);
+            alert('Error in API call. Please check console for more details.');
         }
     };
-
 
 
 
@@ -270,23 +326,60 @@ const TPI = ({ navigation }) => {
             <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
                 Job Number: {item.job_number}
             </Text>
-            <Text style={{ fontSize: 14, color: '#555' }}>
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
                 Component Name: {item.component_name}
             </Text>
-            <Text style={{ fontSize: 14, color: '#555' }}>
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
                 Unit Number: {item.unit_number}
             </Text>
-            <Text style={{ fontSize: 14, color: '#555' }}>
-                Joint Number: {item.joint_number}
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
+                Tube Joints : {item.tube_joints}
             </Text>
-            <Text style={{ fontSize: 12, color: '#888' }}>
-                Description Number: {item.job_desc_number || 'N/A'}
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
+                Job Description Number: {item.job_desc_number}
             </Text>
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
+                Job Offer Date: {item.job_offer_date}
+            </Text>
+            <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#333',
+                marginBottom: 4,
+            }}>
+                Remarks: {item.contract_remark}
+            </Text>
+
 
             <TouchableOpacity
 
                 onPress={() => {
-                    // setSelectedJob(item.sl);
+                    setSelectedJob(item.sl);
                     setModalVisible(true);
                 }}
                 style={{
@@ -420,74 +513,52 @@ const TPI = ({ navigation }) => {
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>Verify Report</Text>
 
-                        {/* Input for Report Number */}
+
+                        {/* Input for Report Time */}
+                        <DropDownPicker
+                            searchable={true}
+                            open={DefectOpen}
+                            value={selectedDefect}
+                            items={DefectItems}
+                            setOpen={setDefectOpen}
+                            setValue={setSelectedDefect}
+                            setItems={setDefectItems}
+                            placeholder="Select Defect Type"
+                            style={{ ...styles.dropdown, zIndex: 1000 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <DropDownPicker
+                            searchable={true}
+                            open={JobStatusOpen}
+                            value={selectedJobStatus}
+                            items={JobStatusItems}
+                            setOpen={setJobStatusOpen}
+                            setValue={setSelectedJobStatus}
+                            setItems={setJobStatusItems}
+                            placeholder="Select Job-Status "
+                            style={{ ...styles.dropdown, zIndex: 900 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
                         <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Report Number:</Text>
+                            <Text style={styles.inputLabel}>Remarks:</Text>
                             <TextInput
-                                style={styles.textInput}
-                                placeholder="Enter Report Number"
+                                style={{ ...styles.textInput, height: 100 }}
+                                placeholder="Enter Remarks"
                                 value={reportNumber} // State value for report number
                                 onChangeText={(text) => setReportNumber(text)} // Update state
+                                multiline
                             />
                         </View>
 
-                        {/* Input for Report Date */}
-                        <TouchableOpacity
-                            onPress={() => {
-                                setShowModal(true);
-                            }}
-                            style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Report Date:</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                placeholder="Enter Report Date (YYYY-MM-DD)"
-                                value={reportDate} // State value for report date
-                                onChangeText={(text) => setReportDate(text)} // Update state
-                                editable={false}
-                            />
-                        </TouchableOpacity>
+                        <CheckBox
+                            title="Check Shot"
+                            checked={isChecked}
+                            onPress={handleCheckBoxPress}
 
-                        {/* Input for Report Time */}
+                        />
 
 
-
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: GRAY,
-                                padding: 10,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-
-                            onPress={handleFilePick}
-                        >
-                            <Text style={{
-                                color: WHITE,
-                                fontSize: 16,
-                                fontWeight: 'bold',
-                            }}>Attach File</Text>
-
-                            <Icon
-                                name="attachment"
-                                size={25}
-                                style={{
-                                    marginLeft: 10,
-                                }}
-                            />
-
-                        </TouchableOpacity>
-
-                        {selectedFile && (
-                            <View style={styles.previewContainer}>
-                                <Text style={styles.previewText}>Selected File:</Text>
-                                <Text style={styles.previewText}>Name: {selectedFile.name}</Text>
-                                { }
-
-                                {/* <TouchableOpacity onPress={handleApiCall} style={styles.apiCallButton}>
-                                    <Text style={styles.emptyListText}>Send to API</Text>
-                                </TouchableOpacity> */}
-                            </View>
-                        )}
 
                         {/* Buttons */}
                         <View
@@ -501,7 +572,13 @@ const TPI = ({ navigation }) => {
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.cancelButton]}
-                                    onPress={() => setModalVisible(false)}
+                                    onPress={() => {
+                                        setReportNumber('')
+                                        setSelectedDefect(null)
+                                        setSelectedJobStatus(null)
+                                        setIsChecked(false)
+                                        setModalVisible(false)
+                                    }}
                                 >
                                     <Text style={styles.buttonText}>Cancel</Text>
                                 </TouchableOpacity>
@@ -509,7 +586,7 @@ const TPI = ({ navigation }) => {
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity
                                     style={[styles.actionButton, styles.submitButton]}
-                                    onPress={() => setModalVisible(false)}
+                                    onPress={handleApiCall}
                                 >
                                     <Text style={styles.buttonText}>Submit</Text>
                                 </TouchableOpacity>
@@ -678,6 +755,9 @@ const TPI = ({ navigation }) => {
                             style={{ ...styles.dropdown, zIndex: 300 }}
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
+
+
+
 
                         {/* Buttons */}
                         <View

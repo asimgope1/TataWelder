@@ -10,6 +10,8 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { getObjByKey } from '../utils/Storage';
+import { BAS_URL } from '../constants/url';
+import { GETNETWORK } from '../utils/Network';
 
 // Define a larger set of colors for unique coloring of each item
 const colors = [
@@ -26,29 +28,91 @@ const colors = [
 
 // Menu items
 const menuItems = [
-    { name: 'Registration', icon: 'receipt', label: 'Registration' },
-    { name: 'New Job', icon: 'new-label', label: 'New Job' },
-    { name: 'Job Approval', icon: 'thumb-up', label: 'Job Approval' },
-    { name: 'Assign Welder', icon: 'work', label: 'Assign Welder' },
-    { name: 'RT Report', icon: 'menu-book', label: 'RT Report' },
-    { name: 'PAUT-Report', icon: 'menu-book', label: 'PAUT Report' },
-    { name: 'Quality Verification', icon: 'check-circle-outline', label: 'Q-Verification' },
-    { name: 'TPI', icon: 'report-gmailerrorred', label: 'TPI-Verification' },
-    { name: 'Final Approval', icon: 'thumbs-up-down', label: 'Final Approval' },
+    { name: 'Registration', icon: 'receipt', label: 'Registration', requiredPermission: 'add_tpuser' },
+    { name: 'New Job', icon: 'new-label', label: 'New Job', requiredPermission: 'add_masterunit' },
+    { name: 'Job Approval', icon: 'thumb-up', label: 'Job Approval', requiredPermission: 'job_approval' },
+    { name: 'Assign Welder', icon: 'work', label: 'Assign Welder', requiredPermission: 'user_role_management' },
+    { name: 'RT Report', icon: 'menu-book', label: 'RT Report', requiredPermission: 'permission_management' },
+    { name: 'PAUT-Report', icon: 'menu-book', label: 'PAUT Report', requiredPermission: 'permission_management' },
+    { name: 'Quality Verification', icon: 'check-circle-outline', label: 'Q-Verification', requiredPermission: 'permission_management' },
+    { name: 'TPI', icon: 'report-gmailerrorred', label: 'TPI-Verification', requiredPermission: 'permission_management' },
+    { name: 'Final Approval', icon: 'thumbs-up-down', label: 'Final Approval', requiredPermission: 'permission_management' },
 ];
+
+
+
+
 
 const CustomDrawerContent = (props) => {
     const { navigation } = props;
     const dispatch = useDispatch();
+    const [user, setUser] = React.useState({});
+    const [permissions, setPermissions] = React.useState([]);
+
 
     useEffect(() => {
         GetPermissions();
+        fetchProfileData();
     }, []);
 
     const GetPermissions = async () => {
         const Permissions = await getObjByKey('loginResponse');
+        if (Permissions && Permissions.permissions) {
+            setPermissions(Permissions.permissions); // Store permissions in state
+        }
         console.log('Permissions', Permissions);
     };
+
+
+
+
+    const fetchProfileData = async () => {
+        try {
+            // Fetch profile data using GETNETWORK
+            const result = await GETNETWORK(
+                `${BAS_URL}api/v1/profile/`,
+                true // `true` indicates that the Authorization token is required
+            );
+
+            // Check if the result is successful
+            if (result.status === 'success') {
+                // Extract the profile data
+                const { address, company_name, email, full_name, phone, role } = result.data;
+
+                // Store data in variables
+                const profileData = {
+                    address: address,
+                    companyName: company_name,
+                    email: email,
+                    fullName: full_name,
+                    phone: phone,
+                    role: role
+                };
+                setUser(profileData);
+
+                // Log the profile data (or you can use these variables wherever needed)
+                console.log("Profile Data Variables:", profileData);
+
+                // You can now use these variables in your component or state
+                // Example: setState(profileData) if using React state
+            } else {
+                console.error("Error fetching profile data:", result.message);
+            }
+        } catch (error) {
+            console.error("Error fetching profile data:", error);
+        }
+    };
+
+    // Call the function to fetch profile data
+
+
+
+    // Call the function to fetch the profile data
+
+    const filteredMenuItems = menuItems.filter(item =>
+        !item.requiredPermission || permissions.includes(item.requiredPermission)
+    );
+
 
     const handleLogout = async () => {
         await AsyncStorage.clear();
@@ -68,15 +132,16 @@ const CustomDrawerContent = (props) => {
                     style={styles.profileImage}
                 />
                 <View style={styles.profileDetails}>
-                    <Text style={styles.profileName}>John Doe</Text>
-                    <Text style={styles.profileDepartment}>Software Development</Text>
-                    <Text style={styles.profileEmail}>john.doe@example.com</Text>
+                    <Text style={styles.profileName}>{
+                        user.fullName}</Text>
+                    <Text style={styles.profileDepartment}>{user.role}</Text>
+                    <Text style={styles.profileEmail}>{user.email}</Text>
                 </View>
             </View>
 
             {/* Menu Section */}
             <View style={styles.gridContainer}>
-                {menuItems.map((item, index) => (
+                {filteredMenuItems.map((item, index) => (
                     <View key={index} style={styles.menuItemContainer}>
                         <TouchableOpacity
                             style={[
@@ -93,6 +158,7 @@ const CustomDrawerContent = (props) => {
                     </View>
                 ))}
             </View>
+
 
             {/* Navigation Buttons Section */}
             <View style={styles.navigationButtonsContainer}>

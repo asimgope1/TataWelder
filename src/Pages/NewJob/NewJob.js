@@ -12,6 +12,7 @@ import {
     StyleSheet,
     TextInput,
     Modal,
+    RefreshControl,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { BRAND, WHITE, GRAY } from '../../constants/color';
@@ -87,17 +88,21 @@ const NewJob = ({ navigation }) => {
         setFormData((prevData) => ({
             ...prevData,
             tube_joints: `${prevData.tube_number} ${prevData.joint_number}`,
+        }));
+    }, [formData.tube_number, formData.joint_number]);
+
+    // Update `job_desc_number` whenever relevant fields change
+    useEffect(() => {
+        setFormData((prevData) => ({
+            ...prevData,
             job_desc_number: `${prevData.area} ${prevData.hanger_number} ${prevData.coil_number} ${prevData.panel_number} ${prevData.row_number}`,
         }));
     }, [
-        formData.tube_number,
-        formData.joint_number,
         formData.area,
         formData.hanger_number,
+        formData.coil_number,
         formData.panel_number,
         formData.row_number,
-        formData.coil_number,
-
     ]);
 
     const [showModal, setShowModal] = useState(false);
@@ -157,35 +162,46 @@ const NewJob = ({ navigation }) => {
 
 
 
-    useEffect(() => {
-        const fetchDropdownData = async () => {
-            try {
-                const response = await GETNETWORK(
-                    `${BAS_URL}welding/jobmaster/create-job/`,
-                    true,
+
+    const [refreshing, setRefreshing] = useState(false); // Refresh state to manage data refreshing
+    const refresh = async () => {
+        setRefreshing(true);
+        fetchDropdownData();
+
+
+
+        setRefreshing(false);
+    };
+
+    const fetchDropdownData = async () => {
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/`,
+                true,
+            );
+
+            if (response.status === 'success') {
+                setUnitItems(
+                    response.data.unit_number.map(item => ({ label: item, value: item })),
                 );
-
-                if (response.status === 'success') {
-                    setUnitItems(
-                        response.data.unit_number.map(item => ({ label: item, value: item })),
-                    );
-                    setcomponentItems([]);
-                    setAreaItems([]);
-                    setHangerItems([]);
-                    setCoilItems([]);
-                    setPanelItems([]);
-                    setRowItems([]);
-                    setTubeItems([]);
-                    setJointItems([]);
+                setcomponentItems([]);
+                setAreaItems([]);
+                setHangerItems([]);
+                setCoilItems([]);
+                setPanelItems([]);
+                setRowItems([]);
+                setTubeItems([]);
+                setJointItems([]);
 
 
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
             }
-        };
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
 
         fetchDropdownData();
     }, [navigation]);
@@ -237,6 +253,36 @@ const NewJob = ({ navigation }) => {
     useFocusEffect(
         React.useCallback(() => {
             resetForm()
+
+            const fetchDropdownData = async () => {
+                try {
+                    const response = await GETNETWORK(
+                        `${BAS_URL}welding/jobmaster/create-job/`,
+                        true,
+                    );
+
+                    if (response.status === 'success') {
+                        setUnitItems(
+                            response.data.unit_number.map(item => ({ label: item, value: item })),
+                        );
+                        setcomponentItems([]);
+                        setAreaItems([]);
+                        setHangerItems([]);
+                        setCoilItems([]);
+                        setPanelItems([]);
+                        setRowItems([]);
+                        setTubeItems([]);
+                        setJointItems([]);
+
+
+                    }
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchDropdownData();
         }, [navigation]
         ))
 
@@ -471,6 +517,13 @@ const NewJob = ({ navigation }) => {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     style={{ flex: 1 }}>
                     <ScrollView
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={refresh}
+                            />
+
+                        }
                         keyboardShouldPersistTaps={'handled'}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{
@@ -823,7 +876,12 @@ const NewJob = ({ navigation }) => {
                                 {/* Submit Button */}
                                 <TouchableOpacity
                                     style={appStyles.submitButton}
-                                    onPress={handleSubmit}>
+                                    onPress={() =>
+                                        handleSubmit()
+
+
+
+                                    }>
                                     <Text style={appStyles.submitButtonText}>Submit</Text>
                                 </TouchableOpacity>
                             </View>

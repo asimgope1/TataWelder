@@ -29,14 +29,14 @@ const colors = [
 // Menu items
 const menuItems = [
     { name: 'Registration', icon: 'receipt', label: 'Registration', requiredPermission: 'add_tpuser' },
-    { name: 'New Job', icon: 'new-label', label: 'New Job', requiredPermission: 'add_masterunit' },
+    { name: 'New Job', icon: 'new-label', label: 'New Job', requiredPermission: 'add_jobmaster' },
     { name: 'Job Approval', icon: 'thumb-up', label: 'Job Approval', requiredPermission: 'job_approval' },
     { name: 'Assign Welder', icon: 'work', label: 'Assign Welder', requiredPermission: 'user_role_management' },
-    { name: 'RT Report', icon: 'menu-book', label: 'RT Report', requiredPermission: 'permission_management' },
-    { name: 'PAUT-Report', icon: 'menu-book', label: 'PAUT Report', requiredPermission: 'permission_management' },
-    { name: 'Quality Verification', icon: 'check-circle-outline', label: 'Q-Verification', requiredPermission: 'permission_management' },
-    { name: 'TPI', icon: 'report-gmailerrorred', label: 'TPI-Verification', requiredPermission: 'permission_management' },
-    { name: 'Final Approval', icon: 'thumbs-up-down', label: 'Final Approval', requiredPermission: 'permission_management' },
+    { name: 'RT Report', icon: 'menu-book', label: 'RT Report', requiredPermission: 'rt_report_entry' },
+    { name: 'PAUT-Report', icon: 'menu-book', label: 'PAUT Report', requiredPermission: 'paut_report_entry' },
+    { name: 'Quality Verification', icon: 'check-circle-outline', label: 'Q-Verification', requiredPermission: 'contractor_quality_verification' },
+    { name: 'TPI', icon: 'report-gmailerrorred', label: 'TPI-Verification', requiredPermission: 'tpi_quality_engineer_verification' },
+    { name: 'Final Approval', icon: 'thumbs-up-down', label: 'Final Approval', requiredPermission: 'final_approval' },
 ];
 
 

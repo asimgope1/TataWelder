@@ -14,7 +14,7 @@ import {
     Alert,
     RefreshControl,
 } from "react-native";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { BLACK, BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
 import { HEIGHT, MyStatusBar, WIDTH } from "../../constants/config";
@@ -26,6 +26,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { pick, keepLocalCopy, DocumentPicker } from "react-native-document-picker";
 import { Calendar } from "react-native-calendars";
 import { getObjByKey } from "../../utils/Storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const RTReport = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -148,6 +149,17 @@ const RTReport = ({ navigation }) => {
     // Fetch data when the component mounts
     useEffect(() => {
         GetToken();
+        setFilterCriteria('')
+        setSelectedUnit(null)
+        setSelectedComponent(null);
+        setSelectedArea(null);
+        setSelectedHanger(null);
+        setSelectedCoil(null)
+        setSelectedPanel(null)
+        setSelectedRow(null)
+        setSelectedTube(null)
+        setSelectedJoint(null)
+        setSelectedWelder(null)
         const fetchData = async () => {
             try {
                 const url = `${BAS_URL}welding/api/v1/query/filters/`;
@@ -174,9 +186,62 @@ const RTReport = ({ navigation }) => {
         };
 
         fetchData();
-    }, []);
+    }, [navigation]);
 
 
+
+
+    useFocusEffect(
+        useCallback(() => {
+            // Function to fetch data
+            setFilterCriteria('')
+            setSelectedUnit(null)
+            setSelectedComponent(null);
+            setSelectedArea(null);
+            setSelectedHanger(null);
+            setSelectedCoil(null)
+            setSelectedPanel(null)
+            setSelectedRow(null)
+            setSelectedTube(null)
+            setSelectedJoint(null)
+            setSelectedWelder(null)
+
+
+            const fetchData = async () => {
+                try {
+                    await GetToken(); // Assuming GetToken() is an async function
+
+                    const url = `${BAS_URL}welding/api/v1/query/filters/`;
+                    const response = await GETNETWORK(url, true); // Use GETNETWORK instead of fetch
+
+                    if (response.status === "success") {
+                        // Update state with API data
+                        setUnitItems(response.data.unit.map(([id, label]) => ({ label, value: id })));
+                        setComponentItems(response.data.components.map((component) => ({ label: component, value: component })));
+                        setAreaItems(response.data.areas.map((area) => ({ label: area, value: area })));
+                        setHangerItems(response.data.hangers.map((hanger) => ({ label: hanger, value: hanger })));
+                        setCoilItems(response.data.coil_number.map((coil) => ({ label: coil, value: coil })));
+                        setPanelItems(response.data.panel_number.map((panel) => ({ label: panel, value: panel })));
+                        setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
+                        setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
+                        setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
+                        setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
+                    } else {
+                        console.log("Error fetching data:", response.message);
+                    }
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            };
+
+            fetchData();
+
+            // Cleanup function (if needed)
+            return () => {
+                // cleanup code (if necessary)
+            };
+        }, [navigation]) // Dependencies go here
+    );
 
 
 
@@ -310,11 +375,16 @@ const RTReport = ({ navigation }) => {
             });
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            fetchData();
 
-    useEffect(() => {
-
-        fetchData();
-    }, [navigation]);
+            // If you need to clean up when the screen loses focus, return a cleanup function
+            return () => {
+                // cleanup code (if needed)
+            };
+        }, [navigation]) // dependencies of the useCallback
+    );
 
     const renderItem = ({ item }) => (
         <View
@@ -620,7 +690,17 @@ const RTReport = ({ navigation }) => {
                                         setReportDate('');
                                         setReportNumber('');
                                         setSelectedFile(null);
-
+                                        setFilterCriteria('')
+                                        setSelectedUnit(null)
+                                        setSelectedComponent(null);
+                                        setSelectedArea(null);
+                                        setSelectedHanger(null);
+                                        setSelectedCoil(null)
+                                        setSelectedPanel(null)
+                                        setSelectedRow(null)
+                                        setSelectedTube(null)
+                                        setSelectedJoint(null)
+                                        setSelectedWelder(null)
                                         setModalVisible(false)
                                     }}
                                 >

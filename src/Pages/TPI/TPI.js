@@ -11,8 +11,9 @@ import {
     TouchableOpacity,
     Modal,
     TextInput,
+    RefreshControl,
 } from "react-native";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
 import { HEIGHT, MyStatusBar } from "../../constants/config";
@@ -22,6 +23,7 @@ import { BAS_URL } from "../../constants/url";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Calendar } from "react-native-calendars";
 import { CheckBox, Icon } from "react-native-elements";
+import { useFocusEffect } from "@react-navigation/native";
 
 const TPI = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -73,10 +75,22 @@ const TPI = ({ navigation }) => {
             setSelectedCoil(null)
             setSelectedPanel(null)
             setSelectedRow(null)
+            fetchData()
 
             console.log('Filter cleared');
         }
     };
+
+    const [refreshing, setRefreshing] = useState(false); // Refresh state to manage data refreshing
+    const refresh = async () => {
+        setRefreshing(true);
+        fetchData();
+
+
+
+        setRefreshing(false);
+    };
+
 
 
 
@@ -227,10 +241,18 @@ const TPI = ({ navigation }) => {
                 console.error('Error in response:', result);
                 alert(`Error: ${result.errors?.error || result.message}`);
                 fetchData()
+                setReportNumber('')
+                setSelectedDefect(null)
+                setSelectedJobStatus(null)
+                setIsChecked(false)
             } else {
                 console.log('API Response:', result);
                 alert(`Success: ${JSON.stringify(result.data?.message || result.message)}`);
                 fetchData()
+                setReportNumber('')
+                setSelectedDefect(null)
+                setSelectedJobStatus(null)
+                setIsChecked(false)
             }
         } catch (error) {
             // Catch and log any errors during the API call
@@ -301,10 +323,33 @@ const TPI = ({ navigation }) => {
     };
 
 
-    useEffect(() => {
 
-        fetchData();
-    }, []);
+    useFocusEffect(
+
+
+        useCallback(() => {
+            fetchData();
+
+            setFilterCriteria('')
+            setSelectedUnit(null)
+            setSelectedComponent(null);
+            setSelectedArea(null);
+            setSelectedHanger(null);
+            setSelectedCoil(null)
+            setSelectedPanel(null)
+            setSelectedRow(null)
+            setSelectedTube(null)
+            setSelectedJoint(null)
+            setSelectedWelder(null)
+
+
+
+            // If you need to clean up when the screen loses focus, return a cleanup function
+            return () => {
+                // cleanup code (if needed)
+            };
+        }, [navigation]) // dependencies of the useCallback
+    );
 
 
     // Fetch API data
@@ -480,6 +525,13 @@ const TPI = ({ navigation }) => {
                                 </View>
 
                                 <FlatList
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={refresh}
+                                        />
+                                    }
+
                                     data={data}
                                     keyExtractor={(item, index) => index.toString()}
                                     renderItem={renderItem}

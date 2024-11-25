@@ -11,7 +11,7 @@ import {
     Modal,
     TextInput,
 } from 'react-native';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { BRAND, RED, WHITE } from '../../constants/color';
 import Header from '../../components/Header';
 import { HEIGHT, MyStatusBar, WIDTH } from '../../constants/config';
@@ -22,6 +22,7 @@ import { Icon } from 'react-native-elements';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { styles } from '../TPI/TPI';
 import { RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 const FinalApproval = ({ navigation }) => {
     const [JobList, SetJobList] = useState([]);
@@ -202,9 +203,6 @@ const FinalApproval = ({ navigation }) => {
         }
     };
 
-    useEffect(() => {
-        GetJobList();
-    }, []);
 
 
 
@@ -225,6 +223,33 @@ const FinalApproval = ({ navigation }) => {
             setLoading(false); // Stop loading
         }
     };
+
+    useFocusEffect(
+
+
+        useCallback(() => {
+            GetJobList();
+
+            setFilterCriteria('')
+            setSelectedUnit(null)
+            setSelectedComponent(null);
+            setSelectedArea(null);
+            setSelectedHanger(null);
+            setSelectedCoil(null)
+            setSelectedPanel(null)
+            setSelectedRow(null)
+            setSelectedTube(null)
+            setSelectedJoint(null)
+            setSelectedWelder(null)
+
+
+
+            // If you need to clean up when the screen loses focus, return a cleanup function
+            return () => {
+                // cleanup code (if needed)
+            };
+        }, [navigation]) // dependencies of the useCallback
+    );
 
     const renderItem = ({ item }) => {
         return (

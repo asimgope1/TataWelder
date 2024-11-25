@@ -12,7 +12,7 @@ import {
     Modal,
     TextInput,
 } from "react-native";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
 import { HEIGHT, MyStatusBar, WIDTH } from "../../constants/config";
@@ -25,6 +25,7 @@ import { Calendar } from "react-native-calendars";
 import { RefreshControl } from "react-native";
 import { pick } from "react-native-document-picker";
 import { getObjByKey } from "../../utils/Storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const PAUTReport = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -149,7 +150,21 @@ const PAUTReport = ({ navigation }) => {
     // Fetch data when the component mounts
     useEffect(() => {
         GetToken()
+
+        setFilterCriteria('')
+        setSelectedUnit(null)
+        setSelectedComponent(null);
+        setSelectedArea(null);
+        setSelectedHanger(null);
+        setSelectedCoil(null)
+        setSelectedPanel(null)
+        setSelectedRow(null)
+        setSelectedTube(null)
+        setSelectedJoint(null)
+        setSelectedWelder(null)
         const fetchData = async () => {
+
+
             try {
                 const url = `${BAS_URL}welding/api/v1/query/filters/`;
                 const response = await GETNETWORK(url, true); // Use GETNETWORK instead of fetch
@@ -309,10 +324,30 @@ const PAUTReport = ({ navigation }) => {
     };
 
 
-    useEffect(() => {
+    useFocusEffect(
 
-        fetchData();
-    }, [navigation]);
+
+        useCallback(() => {
+            fetchData();
+
+            setFilterCriteria('')
+            setSelectedUnit(null)
+            setSelectedComponent(null);
+            setSelectedArea(null);
+            setSelectedHanger(null);
+            setSelectedCoil(null)
+            setSelectedPanel(null)
+            setSelectedRow(null)
+            setSelectedTube(null)
+            setSelectedJoint(null)
+            setSelectedWelder(null)
+
+            // If you need to clean up when the screen loses focus, return a cleanup function
+            return () => {
+                // cleanup code (if needed)
+            };
+        }, [navigation]) // dependencies of the useCallback
+    );
 
 
 

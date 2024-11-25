@@ -13,7 +13,7 @@ import {
     TextInput,
     RefreshControl,
 } from "react-native";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { BRAND, GRAY, WHITE } from "../../constants/color";
 import Header from "../../components/Header";
 import { HEIGHT, MyStatusBar, WIDTH } from "../../constants/config";
@@ -25,6 +25,7 @@ import { Calendar } from "react-native-calendars";
 import { Icon } from "react-native-elements";
 import { pick } from "react-native-document-picker";
 import { getObjByKey } from "../../utils/Storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const QualityVerification = ({ navigation }) => {
     const [data, setData] = useState([]);
@@ -302,10 +303,31 @@ const QualityVerification = ({ navigation }) => {
     };
 
 
-    useEffect(() => {
+    useFocusEffect(
 
-        fetchData();
-    }, []);
+
+        useCallback(() => {
+            fetchData();
+
+            setFilterCriteria('')
+            setSelectedUnit(null)
+            setSelectedComponent(null);
+            setSelectedArea(null);
+            setSelectedHanger(null);
+            setSelectedCoil(null)
+            setSelectedPanel(null)
+            setSelectedRow(null)
+            setSelectedTube(null)
+            setSelectedJoint(null)
+            setSelectedWelder(null)
+            setReportNumber(null)
+
+            // If you need to clean up when the screen loses focus, return a cleanup function
+            return () => {
+                // cleanup code (if needed)
+            };
+        }, [navigation]) // dependencies of the useCallback
+    );
 
     // Fetch API data
 

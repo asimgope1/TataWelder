@@ -229,6 +229,10 @@ const QualityVerification = ({ navigation }) => {
                 fetchData();
                 alert(`Error: ${result.errors.error || result.message}`);
             } else {
+
+                setReportDate('');
+                setReportNumber('');
+                setSelectedFile(null);
                 fetchData();
                 alert(`Success: ${JSON.stringify(result.data.message)}`);
             }

@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 import { getObjByKey } from '../utils/Storage';
 import { BAS_URL } from '../constants/url';
 import { GETNETWORK } from '../utils/Network';
+import { checkuserToken } from '../redux/actions/auth';
 
 // Define a larger set of colors for unique coloring of each item
 const colors = [
@@ -117,6 +118,7 @@ const CustomDrawerContent = (props) => {
     const handleLogout = async () => {
         await AsyncStorage.clear();
         navigation.navigate('LoginStack');
+        // dispatch(checkuserToken())
         alert('Logout Successfully. Please reload the app to log in again.');
     };
 

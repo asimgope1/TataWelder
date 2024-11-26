@@ -240,14 +240,16 @@ const TPI = ({ navigation }) => {
             if (result.status === 'error') {
                 console.error('Error in response:', result);
                 alert(`Error: ${result.errors?.error || result.message}`);
-                fetchData()
                 setReportNumber('')
                 setSelectedDefect(null)
                 setSelectedJobStatus(null)
+                setModalVisible(false)
+                fetchData()
                 setIsChecked(false)
             } else {
                 console.log('API Response:', result);
                 alert(`Success: ${JSON.stringify(result.data?.message || result.message)}`);
+                setModalVisible(false)
                 fetchData()
                 setReportNumber('')
                 setSelectedDefect(null)

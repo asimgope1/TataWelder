@@ -251,6 +251,9 @@ const PAUTReport = ({ navigation }) => {
                     alert(`Error: ${result.errors.error || result.message}`);
                 } else {
                     alert(`Success: ${JSON.stringify(result.data.message)}`);
+                    setReportDate('');
+                    setReportNumber('');
+                    setSelectedFile(null);
                     fetchData();
                 }
             } catch (error) {

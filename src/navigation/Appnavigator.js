@@ -8,5 +8,5 @@ export default Appnavigator = () => {
   const dispatch = useDispatch();
   dispatch(checkuserToken());
   const authStatus = useSelector(state => state?.authStatus);
-  return authStatus ? <HomeStack /> : <LoginStack />;
+  return authStatus === undefined ? null : authStatus ? <HomeStack /> : <LoginStack />;
 };

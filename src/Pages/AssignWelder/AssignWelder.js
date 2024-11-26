@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView, FlatList, TouchableOpacity, Modal, Button, StyleSheet, RefreshControl, TextInput } from 'react-native';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { BLACK, BRAND, WHITE } from '../../constants/color';
 import Header from '../../components/Header';
-import { MyStatusBar } from '../../constants/config';
+import { HEIGHT, MyStatusBar, WIDTH } from '../../constants/config';
 import { appStyles } from '../../styles/AppStyles';
 import { GETNETWORK, POSTNETWORK } from '../../utils/Network'; // Assuming you have this utility function
 import { BAS_URL } from '../../constants/url';
@@ -199,16 +199,20 @@ const AssignWelder = ({ navigation }) => {
 
 
 
+
+
     useFocusEffect(
-        React.useCallback(() => {
-            // Do something when the screen is focused
-            fetchWelderList()
+        useCallback(() => {
+            fetchWelderList();
+            fetchAvailableWelders(); // Fetch available welders to assign
+
+            // Return a cleanup function if needed
             return () => {
-                // Do something when the screen is unfocused or closed
+                // Clean up if necessary
             };
         }, [navigation])
+    );
 
-    )
 
     useEffect(() => {
         fetchWelderList();
@@ -331,6 +335,7 @@ const AssignWelder = ({ navigation }) => {
 
                     onPress={() => {
                         setSelectedJob(item.sl);
+                        fetchWelderList()
                         setModalVisible(true);
                     }}
                     style={{
@@ -380,18 +385,19 @@ const AssignWelder = ({ navigation }) => {
                     alert('Welder assigned successfully!', response.message);
 
 
-                    fetchWelderList()
+
 
                     // reset all states
                     setSelectedJob(null)
                     setSelectedWelder(null)
-                    setItems([])
+                    // setItems([])
+                    fetchWelderList()
 
                 } else {
                     alert('Error assigning welder:', response.message);
                     setSelectedJob(null)
                     setSelectedWelder(null)
-                    setItems([])
+                    // setItems([])
                     fetchWelderList()
                 }
 
@@ -422,6 +428,7 @@ const AssignWelder = ({ navigation }) => {
                             alignItems: 'center',
                             paddingBottom: 20,
                         }}
+                        scrollEnabled={false}
                     >
                         <Header
                             onMenuPress={() => {
@@ -488,22 +495,32 @@ const AssignWelder = ({ navigation }) => {
                                             </TouchableOpacity>
                                         </View>
                                     </View> */}
+                                    <View
+                                        style={{
+                                            height: HEIGHT * 0.8,
+                                            width: WIDTH,
+                                            alignSelf: 'center',
+
+                                        }}
+                                    >
 
 
-                                    <FlatList
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={refreshing}
-                                                onRefresh={refresh}
-                                            />
 
-                                        }
-                                        data={welderList}
-                                        renderItem={renderWelderItem}
-                                        keyExtractor={(item, index) => index.toString()}
-                                        contentContainerStyle={{ paddingBottom: 20 }}
-                                        ListEmptyComponent={renderEmptyComponent}
-                                    />
+                                        <FlatList
+                                            refreshControl={
+                                                <RefreshControl
+                                                    refreshing={refreshing}
+                                                    onRefresh={refresh}
+                                                />
+
+                                            }
+                                            data={welderList}
+                                            renderItem={renderWelderItem}
+                                            keyExtractor={(item, index) => index.toString()}
+                                            contentContainerStyle={{ paddingBottom: 20 }}
+                                            ListEmptyComponent={renderEmptyComponent}
+                                        />
+                                    </View>
                                 </>
                             )}
                         </View>
@@ -542,7 +559,10 @@ const AssignWelder = ({ navigation }) => {
                                     <Text style={styless.buttonText}>Assign Welder</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styless.cancelButton} onPress={() => setModalVisible(false)}>
+                                <TouchableOpacity style={styless.cancelButton} onPress={() => {
+                                    setSelectedWelder(null)
+                                    setModalVisible(false)
+                                }}>
                                     <Text style={styless.buttonText}>Cancel</Text>
                                 </TouchableOpacity>
                             </View>

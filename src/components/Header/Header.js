@@ -133,12 +133,47 @@ const Header = ({ title, onMenuPress, onAddPress }) => {
             {title}
           </Text>
           <View style={styles.rightIconsContainer}>
-            <TouchableOpacity onPress={() => handleApiCall('first')} style={styles.iconContainer}>
-              <Icon name="schema" type="material" color={WHITE} size={27} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleApiCall('second')} style={styles.iconContainer}>
-              <Icon name="car-brake-low-pressure" type="material-community" color={WHITE} size={28} />
-            </TouchableOpacity>
+
+            <View
+              style={{
+                height: HEIGHT * 0.04,
+                width: WIDTH * 0.10,
+                backgroundColor: WHITE,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 10,
+                elevation: 10,
+
+
+              }}
+            >
+
+
+              <TouchableOpacity onPress={() => handleApiCall('first')} style={styles.iconContainer}>
+                <Icon name="schema" type="material" color={BLACK} size={25} />
+              </TouchableOpacity>
+            </View>
+
+
+            <View
+              style={{
+                height: HEIGHT * 0.04,
+                width: WIDTH * 0.10,
+                backgroundColor: WHITE,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 10,
+                elevation: 10,
+
+
+              }}
+            >
+
+
+              <TouchableOpacity onPress={() => handleApiCall('second')} style={styles.iconContainer}>
+                <Icon name="car-brake-low-pressure" type="material-community" color={BLACK} size={22} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </LinearGradient>
@@ -230,8 +265,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rightIconsContainer: {
+    width: '24%',
+    alignSelf: 'flex-end',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-evenly'
   },
   iconContainer: {
     paddingHorizontal: 10,

@@ -1,37 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
+import CustomDrawerContent from './CustomDrawerContent';
 import DashBoard from '../Pages/DashBoard/DashBoard';
 import Registration from '../Pages/Registratration/Registration';
 import NewJob from '../Pages/NewJob/NewJob';
 import JobApproval from '../Pages/JobApproval/JobApproval';
 import RTReport from '../Pages/RTReport/RTReport';
 import PAUTReport from '../Pages/PAUTReport/PAUTReport';
-import QualityVerification from '../Pages/QualityVerification\'/QualityVerification';
 import TPI from '../Pages/TPI/TPI';
 import FinalApproval from '../Pages/FinalApproval/FinalApproval';
-import CustomDrawerContent from './CustomDrawerContent';
-import { WIDTH } from '../constants/config';
 import AssignWelder from '../Pages/AssignWelder/AssignWelder';
 import LoginStack from './LoginStack';
-import Login from '../Pages/Login';
-
+import { WIDTH } from '../constants/config';
+import { useDispatch } from 'react-redux';
+import { checkuserToken } from '../redux/actions/auth';
+import QualityVerification from '../Pages/QualityVerification\'/QualityVerification';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = () => {
+  const [userDetails, setUserDetails] = useState({});
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Fetch user details from storage
+    const fetchUserDetails = async () => {
+      const response = await getObjByKey('userDetails');
+      if (response?.data_value?.length) {
+        setUserDetails(response?.data_value[0]); // Assuming data_value is an array
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
+
+  const handleSignOut = async () => {
+    await clearAll(); // Clear all stored data
+    dispatch(checkuserToken(false)); // Update auth state
+  };
+
   return (
     <Drawer.Navigator
       initialRouteName="DashBoard"
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          width: WIDTH, // Make drawer take full screen width
+          width: WIDTH,
         },
       }}
-      drawerContent={(props) => <CustomDrawerContent {...props} />} // Use custom drawer here
+      drawerContent={(props) => (
+        <CustomDrawerContent
+          {...props}
+          userDetails={userDetails}
+          onSignOut={handleSignOut} // Pass sign-out logic
+        />
+      )}
     >
       <Drawer.Screen name="DashBoard" component={DashBoard} />
       <Drawer.Screen name="Assign Welder" component={AssignWelder} />

@@ -12,6 +12,7 @@ import {
   Modal,
   ImageBackground,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
 import React, { Fragment, useEffect, useState } from 'react';
 import { BLACK, BRAND, GRAY, GREEN, ORANGE, WHITE } from '../../constants/color';
@@ -44,6 +45,13 @@ const Login = ({ navigation, route }) => {
   const [alertModal, setAlertModal] = useState(false);
   const [exitModal, setExitModal] = useState(false);
   const dispatch = useDispatch()
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
 
   const [isSwitchOn, setIsSwitchOn] = React.useState(false);
 
@@ -284,11 +292,10 @@ const Login = ({ navigation, route }) => {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => {
-                    // clearAll()
-                    // dispatch(checkuserToken())
+                  onPress={toggleModal}
+                  // clearAll()
+                  // dispatch(checkuserToken())
 
-                  }}
                   style={{
                     width: WIDTH * 0.9,
                     height: HEIGHT * 0.05,
@@ -378,8 +385,83 @@ const Login = ({ navigation, route }) => {
           onConfirm={() => BackHandler.exitApp()}
         />
       )}
+
+
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={toggleModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              Please contact your admin.
+            </Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={toggleModal}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </Fragment>
   );
 };
 
 export default Login;
+
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  openButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+  },
+  openButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+
+
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    height: HEIGHT * 0.3,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '80%',
+  },
+  modalText: {
+    fontSize: RFValue(15),
+    color: 'black',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: '#FF5C5C',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+});

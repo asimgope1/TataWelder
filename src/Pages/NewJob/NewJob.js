@@ -42,6 +42,7 @@ const NewJob = ({ navigation }) => {
             job_details: "",
             tube_joints: '',
             job_desc_number: "",
+            fresh_old: "",
             offer_date: new Date().toISOString().slice(0, 10), // Reset to current date
         });
         setUnitItems([]);
@@ -79,6 +80,7 @@ const NewJob = ({ navigation }) => {
         tube_joints: "",
         job_desc_number: "",
         offer_date: startDate,
+        fresh_old: ""
     });
     const [startDate, setStartDate] = useState(
         new Date().toISOString().slice(0, 10)
@@ -157,6 +159,12 @@ const NewJob = ({ navigation }) => {
     const [jointItems, setJointItems] = useState([]);
     const [jointStates, setJointStates] = useState({
         jointOpen: false,
+    });
+    const [fresholdItems, setfresholdItems] = useState([
+
+    ]);
+    const [fresholdStates, setfresholdStates] = useState({
+        fresholdOpen: false,
     });
 
 
@@ -273,6 +281,10 @@ const NewJob = ({ navigation }) => {
                         setRowItems([]);
                         setTubeItems([]);
                         setJointItems([]);
+                        setfresholdItems(
+                            response.data.fresh_old.map(item => ({ label: item, value: item })),
+
+                        )
 
 
                     }
@@ -555,7 +567,44 @@ const NewJob = ({ navigation }) => {
 
                                 {/* Card Section for Date and Unit */}
                                 <View style={{ ...styles.cardContainer, zIndex: 1100 }}>
-                                    <Text style={styles.sectionTitle}>Job Details</Text>
+
+                                    <View
+                                        style={{
+                                            width: '100%',
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                        }}
+                                    >
+                                        <View
+                                            style={{
+                                                width: '30%',
+                                                flexDirection: 'row',
+                                                justifyContent: 'space-around',
+                                            }}
+                                        >
+
+                                            <Text style={styles.sectionTitle}>Job Details</Text>
+                                        </View>
+
+
+                                        {/* refresh clear state button */}
+                                        <TouchableOpacity style={{
+                                            backgroundColor: BRAND,
+                                            padding: 5,
+                                            borderRadius: 10,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }} onPress={() => {
+                                            resetForm();
+                                            fetchDropdownData()
+                                        }}>
+                                            <Text style={{
+                                                color: WHITE,
+                                            }}>Refresh</Text>
+
+                                        </TouchableOpacity>
+
+                                    </View>
                                     <View style={styles.row}>
                                         <TouchableOpacity
                                             onPress={() => {
@@ -720,9 +769,13 @@ const NewJob = ({ navigation }) => {
                                                         panelOpen: open,
                                                     }))
                                                 }
-                                                setValue={callback => {
-                                                    const value = callback();
-                                                    handleInputChange('panel_number', value);
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('panel_number', value);
+                                                // }}
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('panel_number', item.value);
+
                                                 }}
                                                 placeholder="Panel Number"
                                                 style={styles.dropdownStyle}
@@ -740,9 +793,13 @@ const NewJob = ({ navigation }) => {
                                                 setOpen={open =>
                                                     setRowStates(prevState => ({ ...prevState, rowOpen: open }))
                                                 }
-                                                setValue={callback => {
-                                                    const value = callback();
-                                                    handleInputChange('row_number', value);
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('row_number', value);
+                                                // }}
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('row_number', item.value);
+
                                                 }}
                                                 placeholder="Row Number"
                                                 style={styles.dropdownStyle}
@@ -768,10 +825,17 @@ const NewJob = ({ navigation }) => {
                                                         tubeOpen: open,
                                                     }))
                                                 }
-                                                setValue={callback => {
-                                                    const value = callback();
-                                                    handleInputChange('tube_number', value); // Correct field updated
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('tube_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('tube_number', item.value);
+
                                                 }}
+
+
                                                 placeholder="Tube Number" // Placeholder corrected
                                                 style={styles.dropdownStyle}
                                                 textStyle={styles.dropdownTextStyle}
@@ -792,9 +856,13 @@ const NewJob = ({ navigation }) => {
                                                         jointOpen: open
                                                     }))
                                                 }
-                                                setValue={callback => {
-                                                    const value = callback();
-                                                    handleInputChange('joint_number', value); // Correct field updated
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('joint_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('joint_number', item.value);
                                                 }}
                                                 placeholder="Joint Number"
                                                 style={styles.dropdownStyle}
@@ -806,6 +874,36 @@ const NewJob = ({ navigation }) => {
 
                                     </View>
                                 </View>
+
+
+                                <View style={{ ...styles.cardContainer, zIndex: 650 }}>
+
+                                    <View style={styles.inputContainer}>
+                                        <Text style={styles.dropdownHeader}>Fresh/Old</Text>
+                                        <DropDownPicker
+                                            searchable={true}
+                                            open={fresholdStates.fresholdOpen}
+                                            value={formData.fresh_old} // Correct value should be 'freshold_number'
+                                            items={fresholdItems} // Ensure fresholdItems is structured correctly
+                                            setOpen={open =>
+                                                setfresholdStates(prevState => ({
+                                                    ...prevState,
+                                                    fresholdOpen: open
+                                                }))
+                                            }
+                                            setValue={callback => {
+                                                const value = callback();
+                                                handleInputChange('fresh_old', value); // Correct field updated
+                                            }}
+                                            placeholder="fresh/old "
+                                            style={styles.dropdownStyle}
+                                            textStyle={styles.dropdownTextStyle}
+                                        />
+
+                                    </View>
+                                </View>
+
+
 
                                 <View style={{ ...styles.cardContainer, zIndex: 600 }}>
                                     <View style={styles.row}>
@@ -828,7 +926,7 @@ const NewJob = ({ navigation }) => {
                                             <Text style={styles.label}>Job Description</Text>
                                             <TextInput
                                                 style={[styles.textInput, styles.disabledInput]}
-                                                value={`${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number}`}
+                                                value={`${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number} ${formData.coil_number}`}
                                                 onChangeText={text => handleInputChange('job_desc_number', `${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number}`)}
                                                 editable={false} // Disabled field
                                             />

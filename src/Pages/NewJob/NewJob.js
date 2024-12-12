@@ -43,7 +43,12 @@ const NewJob = ({ navigation }) => {
             tube_joints: '',
             job_desc_number: "",
             fresh_old: "",
-            offer_date: new Date().toISOString().slice(0, 10), // Reset to current date
+            offer_date: new Date().toISOString().slice(0, 10), // Reset to current date,
+            elevation: "",
+            wall_blower: "",
+            panel: "",
+            neck: "",
+
         });
         setUnitItems([]);
         setcomponentItems([]);
@@ -54,6 +59,10 @@ const NewJob = ({ navigation }) => {
         setRowItems([]);
         setTubeItems([]);
         setJointItems([]);
+        setelevationItems([]);
+        setwallBlowerItems([]);
+        setPanelItems([]);
+        setneckItems([]);
         setDropdownStates({ unitOpen: false });
         setcomponentStates({ componentOpen: false });
         setAreaStates({ areaOpen: false });
@@ -63,6 +72,7 @@ const NewJob = ({ navigation }) => {
         setRowStates({ rowOpen: false });
         setTubeStates({ tubeOpen: false });
         setJointStates({ jointOpen: false });
+
     };
     const [formData, setFormData] = useState({
         unit_number: '',
@@ -80,7 +90,12 @@ const NewJob = ({ navigation }) => {
         tube_joints: "",
         job_desc_number: "",
         offer_date: startDate,
-        fresh_old: ""
+        fresh_old: "",
+        elevation: "",
+        wall_blower: "",
+        panel: "",
+        neck: "",
+
     });
     const [startDate, setStartDate] = useState(
         new Date().toISOString().slice(0, 10)
@@ -166,6 +181,30 @@ const NewJob = ({ navigation }) => {
     const [fresholdStates, setfresholdStates] = useState({
         fresholdOpen: false,
     });
+    const [elevationItems, setelevationItems] = useState([
+
+    ]);
+    const [elevationStates, setelevationStates] = useState({
+        elevationOpen: false,
+    });
+    const [wallBlowerItems, setwallBlowerItems] = useState([
+
+    ]);
+    const [wallBlowerStates, setwallBlowerStates] = useState({
+        wallBlowerOpen: false,
+    });
+    const [PanellItems, setPanellItems] = useState([
+
+    ]);
+    const [PanellStates, setPanellStates] = useState({
+        PanellOpen: false,
+    });
+    const [neckItems, setneckItems] = useState([
+
+    ]);
+    const [neckStates, setneckStates] = useState({
+        neckOpen: false,
+    });
 
 
 
@@ -215,10 +254,13 @@ const NewJob = ({ navigation }) => {
     }, [navigation]);
 
     const handleInputChange = (field, value) => {
+        console.log('hii', field, value);
         setFormData(prevData => ({ ...prevData, [field]: value }));
     };
 
     const handleSubmit = async () => {
+
+        console.log('formdata', formData);
         // Validate the required fields before form submission
         if (
             !formData.area &&
@@ -505,6 +547,20 @@ const NewJob = ({ navigation }) => {
                 setJointItems(
                     response.data.joint_number.map(item => ({ label: item, value: item }))
                 );
+
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
             } else {
                 console.error('Failed to fetch data:', response.message);
             }
@@ -874,9 +930,137 @@ const NewJob = ({ navigation }) => {
 
                                     </View>
                                 </View>
-
-
                                 <View style={{ ...styles.cardContainer, zIndex: 650 }}>
+                                    <View style={styles.row}>
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Elevation</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={elevationStates.elevationOpen}
+                                                value={formData.elevation_number} // Should correspond to 'elevation_number'
+                                                items={elevationItems} // Ensure elevationItems has a correct structure
+                                                setOpen={open =>
+                                                    setelevationStates(prevState => ({
+                                                        ...prevState,
+                                                        elevationOpen: open,
+                                                    }))
+                                                }
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('tube_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('elevation', item.value);
+
+                                                }}
+
+
+                                                placeholder="Elevation" // Placeholder corrected
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Wall Blower</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={wallBlowerStates.wallBlowerOpen}
+                                                value={formData.wallBlower_number} // Correct value should be 'wallBlower_number'
+                                                items={wallBlowerItems} // Ensure wallBlowerItems is structured correctly
+                                                setOpen={open =>
+                                                    setwallBlowerStates(prevState => ({
+                                                        ...prevState,
+                                                        wallBlowerOpen: open
+                                                    }))
+                                                }
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('joint_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('wall_blower', item.value);
+                                                }}
+                                                placeholder="Wall blower"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+
+                                    </View>
+                                </View>
+                                <View style={{ ...styles.cardContainer, zIndex: 600 }}>
+                                    <View style={styles.row}>
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Panel</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={PanellStates.PanellOpen}
+                                                value={formData.Panell_number} // Should correspond to 'Panell_number'
+                                                items={PanellItems} // Ensure PanellItems has a correct structure
+                                                setOpen={open =>
+                                                    setPanellStates(prevState => ({
+                                                        ...prevState,
+                                                        PanellOpen: open,
+                                                    }))
+                                                }
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('tube_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('panel', item.value);
+
+                                                }}
+
+
+                                                placeholder="Panel" // Placeholder corrected
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Neck</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={neckStates.neckOpen}
+                                                value={formData.neck_number} // Correct value should be 'neck_number'
+                                                items={neckItems} // Ensure neckItems is structured correctly
+                                                setOpen={open =>
+                                                    setneckStates(prevState => ({
+                                                        ...prevState,
+                                                        neckOpen: open
+                                                    }))
+                                                }
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('joint_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('neck', item.value);
+                                                }}
+                                                placeholder="Neck"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+
+                                    </View>
+                                </View>
+
+
+                                <View style={{ ...styles.cardContainer, zIndex: 550 }}>
 
                                     <View style={styles.inputContainer}>
                                         <Text style={styles.dropdownHeader}>Fresh/Old</Text>
@@ -905,7 +1089,7 @@ const NewJob = ({ navigation }) => {
 
 
 
-                                <View style={{ ...styles.cardContainer, zIndex: 600 }}>
+                                <View style={{ ...styles.cardContainer, zIndex: 500 }}>
                                     <View style={styles.row}>
 
 

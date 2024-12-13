@@ -112,7 +112,19 @@ const NewJob = ({ navigation }) => {
     useEffect(() => {
         setFormData((prevData) => ({
             ...prevData,
-            job_desc_number: `${prevData.area} ${prevData.hanger_number} ${prevData.coil_number} ${prevData.panel_number} ${prevData.row_number}`,
+            job_desc_number: [
+                prevData?.area,
+                prevData?.hanger_number,
+                prevData?.coil_number,
+                prevData?.panel_number,
+                prevData?.row_number,
+                prevData?.wall_blower,
+                prevData?.elevation,
+                prevData?.panel,
+                prevData?.neck,
+            ]
+                .filter((value) => value) // Filter out empty or undefined values
+                .join(' '), // Join remaining values with a space
         }));
     }, [
         formData.area,
@@ -120,7 +132,12 @@ const NewJob = ({ navigation }) => {
         formData.coil_number,
         formData.panel_number,
         formData.row_number,
+        formData.wall_blower,
+        formData.elevation,
+        formData.panel,
+        formData.neck,
     ]);
+
 
     const [showModal, setShowModal] = useState(false);
 
@@ -673,6 +690,38 @@ const NewJob = ({ navigation }) => {
                                             </View>
                                         </TouchableOpacity>
 
+
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Fresh/Old</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={fresholdStates.fresholdOpen}
+                                                value={formData.fresh_old} // Correct value should be 'freshold_number'
+                                                items={fresholdItems} // Ensure fresholdItems is structured correctly
+                                                setOpen={open =>
+                                                    setfresholdStates(prevState => ({
+                                                        ...prevState,
+                                                        fresholdOpen: open
+                                                    }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('fresh_old', value); // Correct field updated
+                                                }}
+                                                placeholder="fresh/old "
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+                                    </View>
+                                </View>
+
+                                {/* Card Section for Component and Area */}
+                                <View style={{ ...styles.cardContainer, zIndex: 1000 }}>
+                                    <View style={styles.row}>
+
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Unit</Text>
                                             <DropDownPicker
@@ -699,12 +748,6 @@ const NewJob = ({ navigation }) => {
                                                 textStyle={styles.dropdownTextStyle}
                                             />
                                         </View>
-                                    </View>
-                                </View>
-
-                                {/* Card Section for Component and Area */}
-                                <View style={{ ...styles.cardContainer, zIndex: 1000 }}>
-                                    <View style={styles.row}>
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Component</Text>
                                             <DropDownPicker
@@ -731,6 +774,15 @@ const NewJob = ({ navigation }) => {
                                             />
                                         </View>
 
+
+                                    </View>
+                                </View>
+
+                                {/* Additional Card Sections for Other Fields */}
+                                <View style={{ ...styles.cardContainer, zIndex: 900 }}>
+                                    <View style={styles.row}>
+
+
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Area</Text>
                                             <DropDownPicker
@@ -756,12 +808,6 @@ const NewJob = ({ navigation }) => {
                                                 textStyle={styles.dropdownTextStyle}
                                             />
                                         </View>
-                                    </View>
-                                </View>
-
-                                {/* Additional Card Sections for Other Fields */}
-                                <View style={{ ...styles.cardContainer, zIndex: 900 }}>
-                                    <View style={styles.row}>
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Hanger Number</Text>
                                             <DropDownPicker
@@ -788,28 +834,11 @@ const NewJob = ({ navigation }) => {
                                             />
                                         </View>
 
-                                        <View style={styles.inputContainer}>
-                                            <Text style={styles.dropdownHeader}>Coil Number</Text>
-                                            <DropDownPicker
-                                                searchable={true}
-                                                open={coilStates.coilOpen}
-                                                value={formData.coil_number} // Ensure formData.coil_number is a valid value
-                                                items={coilItems} // Ensure coilItems has a structure like [{ label: 'Item 1', value: 'item1' }]
-                                                setOpen={open =>
-                                                    setCoilStates(prevState => ({ ...prevState, coilOpen: open }))
-                                                }
-                                                setValue={callback => {
-                                                    const value = callback();
-                                                    handleInputChange('coil_number', value); // Ensure the correct field is updated
-                                                }}
-                                                onSelectItem={item => coilSelect(item?.value)}
-                                                placeholder="Select Coil Number" // Improved placeholder for clarity
-                                                style={styles.dropdownStyle}
-                                                textStyle={styles.dropdownTextStyle}
-                                            />
-                                        </View>
+
                                     </View>
                                 </View>
+
+
                                 <View style={{ ...styles.cardContainer, zIndex: 800 }}>
                                     <View style={styles.row}>
                                         <View style={styles.inputContainer}>
@@ -866,6 +895,8 @@ const NewJob = ({ navigation }) => {
 
                                     </View>
                                 </View>
+
+
                                 <View style={{ ...styles.cardContainer, zIndex: 700 }}>
                                     <View style={styles.row}>
                                         <View style={styles.inputContainer}>
@@ -930,6 +961,7 @@ const NewJob = ({ navigation }) => {
 
                                     </View>
                                 </View>
+
                                 <View style={{ ...styles.cardContainer, zIndex: 650 }}>
                                     <View style={styles.row}>
                                         <View style={styles.inputContainer}>
@@ -994,6 +1026,7 @@ const NewJob = ({ navigation }) => {
 
                                     </View>
                                 </View>
+
                                 <View style={{ ...styles.cardContainer, zIndex: 600 }}>
                                     <View style={styles.row}>
                                         <View style={styles.inputContainer}>
@@ -1063,27 +1096,24 @@ const NewJob = ({ navigation }) => {
                                 <View style={{ ...styles.cardContainer, zIndex: 550 }}>
 
                                     <View style={styles.inputContainer}>
-                                        <Text style={styles.dropdownHeader}>Fresh/Old</Text>
+                                        <Text style={styles.dropdownHeader}>Coil Number</Text>
                                         <DropDownPicker
                                             searchable={true}
-                                            open={fresholdStates.fresholdOpen}
-                                            value={formData.fresh_old} // Correct value should be 'freshold_number'
-                                            items={fresholdItems} // Ensure fresholdItems is structured correctly
+                                            open={coilStates.coilOpen}
+                                            value={formData.coil_number} // Ensure formData.coil_number is a valid value
+                                            items={coilItems} // Ensure coilItems has a structure like [{ label: 'Item 1', value: 'item1' }]
                                             setOpen={open =>
-                                                setfresholdStates(prevState => ({
-                                                    ...prevState,
-                                                    fresholdOpen: open
-                                                }))
+                                                setCoilStates(prevState => ({ ...prevState, coilOpen: open }))
                                             }
                                             setValue={callback => {
                                                 const value = callback();
-                                                handleInputChange('fresh_old', value); // Correct field updated
+                                                handleInputChange('coil_number', value); // Ensure the correct field is updated
                                             }}
-                                            placeholder="fresh/old "
+                                            onSelectItem={item => coilSelect(item?.value)}
+                                            placeholder="Select Coil Number" // Improved placeholder for clarity
                                             style={styles.dropdownStyle}
                                             textStyle={styles.dropdownTextStyle}
                                         />
-
                                     </View>
                                 </View>
 
@@ -1110,8 +1140,8 @@ const NewJob = ({ navigation }) => {
                                             <Text style={styles.label}>Job Description</Text>
                                             <TextInput
                                                 style={[styles.textInput, styles.disabledInput]}
-                                                value={`${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number} ${formData.coil_number}`}
-                                                onChangeText={text => handleInputChange('job_desc_number', `${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number}`)}
+                                                value={`${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number} ${formData.coil_number} ${formData.wall_blower} ${formData.elevation} ${formData.panel} ${formData.neck}`}
+                                                onChangeText={text => handleInputChange('job_desc_number', `${formData.area} ${formData.hanger_number} ${formData.panel_number} ${formData.row_number} ${formData.coil_number} ${formData.wall_blower} ${formData.elevation} ${formData.panel} ${formData.neck}`)}
                                                 editable={false} // Disabled field
                                             />
                                         </View>

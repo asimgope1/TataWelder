@@ -91,10 +91,10 @@ const NewJob = ({ navigation }) => {
         job_desc_number: "",
         offer_date: startDate,
         fresh_old: "",
-        elevation: "",
-        wall_blower: "",
-        panel: "",
-        neck: "",
+        elevation: '',
+        wall_blower: '',
+        panel: '',
+        neck: '',
 
     });
     const [startDate, setStartDate] = useState(
@@ -937,7 +937,7 @@ const NewJob = ({ navigation }) => {
                                             <DropDownPicker
                                                 searchable={true}
                                                 open={elevationStates.elevationOpen}
-                                                value={formData.elevation_number} // Should correspond to 'elevation_number'
+                                                value={formData.elevation} // Should correspond to 'elevation_number'
                                                 items={elevationItems} // Ensure elevationItems has a correct structure
                                                 setOpen={open =>
                                                     setelevationStates(prevState => ({
@@ -968,7 +968,7 @@ const NewJob = ({ navigation }) => {
                                             <DropDownPicker
                                                 searchable={true}
                                                 open={wallBlowerStates.wallBlowerOpen}
-                                                value={formData.wallBlower_number} // Correct value should be 'wallBlower_number'
+                                                value={formData.wall_blower} // Correct value should be 'wallBlower_number'
                                                 items={wallBlowerItems} // Ensure wallBlowerItems is structured correctly
                                                 setOpen={open =>
                                                     setwallBlowerStates(prevState => ({
@@ -1001,7 +1001,7 @@ const NewJob = ({ navigation }) => {
                                             <DropDownPicker
                                                 searchable={true}
                                                 open={PanellStates.PanellOpen}
-                                                value={formData.Panell_number} // Should correspond to 'Panell_number'
+                                                value={formData.panel} // Should correspond to 'Panell_number'
                                                 items={PanellItems} // Ensure PanellItems has a correct structure
                                                 setOpen={open =>
                                                     setPanellStates(prevState => ({
@@ -1032,7 +1032,7 @@ const NewJob = ({ navigation }) => {
                                             <DropDownPicker
                                                 searchable={true}
                                                 open={neckStates.neckOpen}
-                                                value={formData.neck_number} // Correct value should be 'neck_number'
+                                                value={formData.neck} // Correct value should be 'neck_number'
                                                 items={neckItems} // Ensure neckItems is structured correctly
                                                 setOpen={open =>
                                                     setneckStates(prevState => ({

@@ -384,24 +384,24 @@ const NewJob = ({ navigation }) => {
 
             if (response.status === 'success') {
                 // console.log('for areaSelect', response);
-                // setHangerItems(
-                //     response.data.hanger_number.map(item => ({ label: item, value: item })),
-                // );
-                // setCoilItems(
-                //     response.data.coil_number.map(item => ({ label: item, value: item })),
-                // );
-                // setPanelItems(
-                //     response.data.panel_number.map(item => ({ label: item, value: item })),
-                // );
-                // setRowItems(
-                //     response.data.row_number.map(item => ({ label: item, value: item })),
-                // )
-                // setTubeItems(
-                //     response.data.tube_number.map(item => ({ label: item, value: item })),
-                // );
-                // setJointItems(
-                //     response.data.joint_number.map(item => ({ label: item, value: item })),
-                // );
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setCoilItems(
+                    response.data.coil_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                )
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
 
 
             }
@@ -477,6 +477,20 @@ const NewJob = ({ navigation }) => {
                 setJointItems(
                     response.data.joint_number.map(item => ({ label: item, value: item })),
                 );
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
+
             } else {
                 // Clear dropdown items if the response status isn't successful
                 clearDropdownItems();
@@ -841,6 +855,28 @@ const NewJob = ({ navigation }) => {
 
                                 <View style={{ ...styles.cardContainer, zIndex: 800 }}>
                                     <View style={styles.row}>
+
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Coil Number</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={coilStates.coilOpen}
+                                                value={formData.coil_number} // Ensure formData.coil_number is a valid value
+                                                items={coilItems} // Ensure coilItems has a structure like [{ label: 'Item 1', value: 'item1' }]
+                                                setOpen={open =>
+                                                    setCoilStates(prevState => ({ ...prevState, coilOpen: open }))
+                                                }
+                                                setValue={callback => {
+                                                    const value = callback();
+                                                    handleInputChange('coil_number', value); // Ensure the correct field is updated
+                                                }}
+                                                onSelectItem={item => coilSelect(item?.value)}
+                                                placeholder="Select Coil Number" // Improved placeholder for clarity
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+                                        </View>
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Panel Number</Text>
                                             <DropDownPicker
@@ -868,6 +904,16 @@ const NewJob = ({ navigation }) => {
                                             />
                                         </View>
 
+
+
+                                    </View>
+                                </View>
+
+
+                                <View style={{ ...styles.cardContainer, zIndex: 700 }}>
+                                    <View style={styles.row}>
+
+
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Row Number</Text>
                                             <DropDownPicker
@@ -891,14 +937,6 @@ const NewJob = ({ navigation }) => {
                                                 textStyle={styles.dropdownTextStyle}
                                             />
                                         </View>
-
-
-                                    </View>
-                                </View>
-
-
-                                <View style={{ ...styles.cardContainer, zIndex: 700 }}>
-                                    <View style={styles.row}>
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Tube Number</Text>
                                             <DropDownPicker
@@ -930,6 +968,15 @@ const NewJob = ({ navigation }) => {
 
                                         </View>
 
+
+
+
+                                    </View>
+                                </View>
+
+                                <View style={{ ...styles.cardContainer, zIndex: 650 }}>
+                                    <View style={styles.row}>
+
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Joint Number</Text>
                                             <DropDownPicker
@@ -958,12 +1005,6 @@ const NewJob = ({ navigation }) => {
 
                                         </View>
 
-
-                                    </View>
-                                </View>
-
-                                <View style={{ ...styles.cardContainer, zIndex: 650 }}>
-                                    <View style={styles.row}>
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Elevation</Text>
                                             <DropDownPicker
@@ -995,6 +1036,15 @@ const NewJob = ({ navigation }) => {
 
                                         </View>
 
+
+
+
+                                    </View>
+                                </View>
+
+                                <View style={{ ...styles.cardContainer, zIndex: 600 }}>
+                                    <View style={styles.row}>
+
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Wall Blower</Text>
                                             <DropDownPicker
@@ -1022,13 +1072,6 @@ const NewJob = ({ navigation }) => {
                                             />
 
                                         </View>
-
-
-                                    </View>
-                                </View>
-
-                                <View style={{ ...styles.cardContainer, zIndex: 600 }}>
-                                    <View style={styles.row}>
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Panel</Text>
                                             <DropDownPicker
@@ -1060,33 +1103,6 @@ const NewJob = ({ navigation }) => {
 
                                         </View>
 
-                                        <View style={styles.inputContainer}>
-                                            <Text style={styles.dropdownHeader}>Neck</Text>
-                                            <DropDownPicker
-                                                searchable={true}
-                                                open={neckStates.neckOpen}
-                                                value={formData.neck} // Correct value should be 'neck_number'
-                                                items={neckItems} // Ensure neckItems is structured correctly
-                                                setOpen={open =>
-                                                    setneckStates(prevState => ({
-                                                        ...prevState,
-                                                        neckOpen: open
-                                                    }))
-                                                }
-                                                // setValue={callback => {
-                                                //     const value = callback();
-                                                //     handleInputChange('joint_number', value); // Correct field updated
-                                                // }}
-
-                                                onSelectItem={(item) => {
-                                                    handleInputChange('neck', item.value);
-                                                }}
-                                                placeholder="Neck"
-                                                style={styles.dropdownStyle}
-                                                textStyle={styles.dropdownTextStyle}
-                                            />
-
-                                        </View>
 
 
                                     </View>
@@ -1096,25 +1112,33 @@ const NewJob = ({ navigation }) => {
                                 <View style={{ ...styles.cardContainer, zIndex: 550 }}>
 
                                     <View style={styles.inputContainer}>
-                                        <Text style={styles.dropdownHeader}>Coil Number</Text>
+                                        <Text style={styles.dropdownHeader}>Neck</Text>
                                         <DropDownPicker
                                             searchable={true}
-                                            open={coilStates.coilOpen}
-                                            value={formData.coil_number} // Ensure formData.coil_number is a valid value
-                                            items={coilItems} // Ensure coilItems has a structure like [{ label: 'Item 1', value: 'item1' }]
+                                            open={neckStates.neckOpen}
+                                            value={formData.neck} // Correct value should be 'neck_number'
+                                            items={neckItems} // Ensure neckItems is structured correctly
                                             setOpen={open =>
-                                                setCoilStates(prevState => ({ ...prevState, coilOpen: open }))
+                                                setneckStates(prevState => ({
+                                                    ...prevState,
+                                                    neckOpen: open
+                                                }))
                                             }
-                                            setValue={callback => {
-                                                const value = callback();
-                                                handleInputChange('coil_number', value); // Ensure the correct field is updated
+                                            // setValue={callback => {
+                                            //     const value = callback();
+                                            //     handleInputChange('joint_number', value); // Correct field updated
+                                            // }}
+
+                                            onSelectItem={(item) => {
+                                                handleInputChange('neck', item.value);
                                             }}
-                                            onSelectItem={item => coilSelect(item?.value)}
-                                            placeholder="Select Coil Number" // Improved placeholder for clarity
+                                            placeholder="Neck"
                                             style={styles.dropdownStyle}
                                             textStyle={styles.dropdownTextStyle}
                                         />
+
                                     </View>
+
                                 </View>
 
 

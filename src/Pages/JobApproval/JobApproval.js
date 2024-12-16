@@ -74,6 +74,28 @@ const JobApproval = ({ navigation }) => {
     const [selectedJoint, setSelectedJoint] = useState(null);
     const [jointOpen, setJointOpen] = useState(false);
 
+    const [elevationItems, setelevationItems] = useState([]);
+    const [selectedelevation, setSelectedelevation] = useState(null);
+    const [elevationtOpen, setelevationOpen] = useState(false);
+
+    const [wallblowerItems, setwallblowerItems] = useState([]);
+    const [selectedwallblower, setSelectedwallblower] = useState(null);
+    const [wallblowertOpen, setwallblowerOpen] = useState(false);
+
+
+    const [panellItems, setpanellItems] = useState([]);
+    const [selectedpanell, setSelectedpanell] = useState(null);
+    const [panelltOpen, setpanellOpen] = useState(false);
+
+
+    const [neckItems, setneckItems] = useState([]);
+    const [selectedneck, setSelectedneck] = useState(null);
+    const [necktOpen, setneckOpen] = useState(false);
+
+
+
+
+
 
 
 
@@ -83,6 +105,7 @@ const JobApproval = ({ navigation }) => {
             try {
                 const url = `${BAS_URL}welding/api/v1/query/filters/`;
                 const response = await GETNETWORK(url, true); // Use GETNETWORK instead of fetch
+                console.log('object response', response)
 
                 if (response.status === "success") {
                     // Update state with API data
@@ -95,6 +118,13 @@ const JobApproval = ({ navigation }) => {
                     setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
                     setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
                     setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
+                    setelevationItems(response.data.elevation.map((elevation) => ({ label: elevation, value: elevation })));
+                    setwallblowerItems(response.data.wall_blower.map((wallblower) => ({ label: wallblower, value: wallblower })));
+
+                    // Panel and Neck items
+                    setpanellItems((response.data.panel || []).map((panel) => ({ label: panel, value: panel })));
+                    setneckItems((response.data.neck || []).map((neck) => ({ label: neck, value: neck })));
+
                 } else {
                     console.log("Error fetching data:", response.message);
                 }
@@ -236,61 +266,51 @@ const JobApproval = ({ navigation }) => {
 
 
     const fetchData = async (params = {}) => {
+        // Do not call the API if no parameters are provided
+        if (Object.keys(params).length === 0) {
+            console.log("No parameters provided. Skipping API call.");
+            SetJobList([]); // Reset job list
+            return;
+        }
+
         setLoading(true);
 
         // Base URL
         const url = `${BAS_URL}welding/jobmaster/joblist/`;
 
-        // Check if there are any query params in the `params` object
-        const queryString = Object.keys(params).length
-            ? `?${new URLSearchParams(params).toString()}`
-            : ''; // Construct query string
-
-        // Final URL with or without query parameters
+        // Construct query string
+        const queryString = `?${new URLSearchParams(params).toString()}`;
         const finalUrl = `${url}${queryString}`;
+        console.log("Final URL:", finalUrl); // Debug URL
 
-        console.log("Final URL:", finalUrl); // Debug: Check constructed URL
+        try {
+            const response = await GETNETWORK(finalUrl, true); // Make API call
 
-        // Fetch data using GETNETWORK with the constructed URL
-        GETNETWORK(finalUrl, true)
-            .then((response) => {
-                if (response.status === 'success') {
+            if (response.status === 'success') {
+                if (response.data && response.data.length > 0) {
+                    // Populate the job list with fetched data
                     SetJobList(response.data);
                     console.log('joblist', response);
-
-                    // Reset selected filters after data is fetched
-                    // setSelectedUnit(null);
-                    // setSelectedComponent(null);
-                    // setSelectedArea(null);
-                    // setSelectedHanger(null);
-                    // setSelectedCoil(null);
-                    // setSelectedPanel(null);
-                    // setSelectedRow(null);
-                    // setSelectedTube(null);
-                    // setSelectedJoint(null);
-                    // setSelectedWelder(null);
-                    setLoading(false);
                 } else {
-                    // Reset selected filters in case of error
-                    setLoading(false);
-                    setSelectedUnit(null);
-                    setSelectedComponent(null);
-                    setSelectedArea(null);
-                    setSelectedHanger(null);
-                    setSelectedCoil(null);
-                    setSelectedPanel(null);
-                    setSelectedRow(null);
-                    setSelectedTube(null);
-                    setSelectedJoint(null);
-                    setSelectedWelder(null);
-                    console.log('Error:', response.message);
+                    // No data returned; set JobList to empty array
+                    SetJobList([]);
+                    console.log('No data available for the selected query parameters.');
                 }
-            })
-            .catch((error) => {
-                setLoading(false);
-                console.error('Fetch Error:', error);
-            });
+            } else {
+                // API responded with an error
+                SetJobList([]); // Reset job list
+                console.log('Error:', response.message);
+            }
+        } catch (error) {
+            // Handle fetch error
+            SetJobList([]); // Reset job list
+            console.error('Fetch Error:', error);
+        } finally {
+            setLoading(false); // Always reset loading state
+        }
     };
+
+
 
 
     useEffect(() => {
@@ -685,6 +705,74 @@ const JobApproval = ({ navigation }) => {
 
                         {/* Welder Dropdown */}
 
+                        <Text style={styles.dropdownHeader}>Elevation</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={elevationtOpen}
+                            value={selectedelevation} // Should correspond to 'elevation_number'
+                            items={elevationItems} // Ensure elevationItems has a correct structure
+                            setOpen={setelevationOpen}
+                            setValue={setSelectedelevation}
+                            setItems={setelevationItems}
+                            placeholder="Select Elevation" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 350 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <Text style={styles.dropdownHeader}>WallBlower</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={wallblowertOpen}
+                            value={selectedwallblower} // Should correspond to 'wallblower_number'
+                            items={wallblowerItems} // Ensure wallblowerItems has a correct structure
+                            setOpen={
+                                setwallblowerOpen
+                            }
+                            setValue={setSelectedwallblower}
+                            setItems={setwallblowerItems}
+
+
+
+                            placeholder="Select WallBlower" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 300 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <Text style={styles.dropdownHeader}>Panel</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={panelltOpen}
+                            value={selectedpanell} // Should correspond to 'panell_number'
+                            items={panellItems} // Ensure panellItems has a correct structure
+                            setOpen={
+                                setpanellOpen
+                            }
+                            setValue={setSelectedpanell}
+                            setItems={setpanellItems}
+
+
+
+                            placeholder="Select Panel" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 250 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <Text style={styles.dropdownHeader}>Neck</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={necktOpen}
+                            value={selectedneck} // Should correspond to 'neck_number'
+                            items={neckItems} // Ensure neckItems has a correct structure
+                            setOpen={
+                                setneckOpen
+                            }
+                            setValue={setSelectedneck}
+                            setItems={setneckItems}
+
+
+
+                            placeholder="Select Neck" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 350 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
 
                         {/* Buttons */}
                         <View
@@ -717,6 +805,11 @@ const JobApproval = ({ navigation }) => {
                                             selectedRow,
                                             selectedTube,
                                             selectedJoint,
+                                            selectedpanell,
+                                            selectedelevation,
+                                            selectedwallblower,
+                                            selectedneck,
+
                                         ]
                                             .filter(Boolean) // Remove any null or undefined values
                                             .join(', '); // Join them with a comma for better readability
@@ -734,6 +827,10 @@ const JobApproval = ({ navigation }) => {
                                             row_number: selectedRow || undefined,
                                             tube_number: selectedTube || undefined,
                                             joint_number: selectedJoint || undefined,
+                                            panel: selectedpanell || undefined,
+                                            elevation: selectedelevation || undefined,
+                                            wall_blower: selectedwallblower || undefined,
+                                            neck: selectedneck || undefined,
                                         };
 
                                         // Remove any keys with undefined values

@@ -134,6 +134,25 @@ const TPI = ({ navigation }) => {
     const [selectedWelder, setSelectedWelder] = useState(null);
     const [welderOpen, setWelderOpen] = useState(false);
 
+    const [elevationItems, setelevationItems] = useState([]);
+    const [selectedelevation, setSelectedelevation] = useState(null);
+    const [elevationtOpen, setelevationOpen] = useState(false);
+
+    const [wallblowerItems, setwallblowerItems] = useState([]);
+    const [selectedwallblower, setSelectedwallblower] = useState(null);
+    const [wallblowertOpen, setwallblowerOpen] = useState(false);
+
+
+    const [panellItems, setpanellItems] = useState([]);
+    const [selectedpanell, setSelectedpanell] = useState(null);
+    const [panelltOpen, setpanellOpen] = useState(false);
+
+
+    const [neckItems, setneckItems] = useState([]);
+    const [selectedneck, setSelectedneck] = useState(null);
+    const [necktOpen, setneckOpen] = useState(false);
+
+
 
 
 
@@ -199,7 +218,12 @@ const TPI = ({ navigation }) => {
                     setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
                     setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
                     setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
-                    setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
+                    setelevationItems(response.data.elevation.map((elevation) => ({ label: elevation, value: elevation })));
+                    setwallblowerItems(response.data.wall_blower.map((wallblower) => ({ label: wallblower, value: wallblower })));
+
+                    // Panel and Neck items
+                    setpanellItems((response.data.panel || []).map((panel) => ({ label: panel, value: panel })));
+                    setneckItems((response.data.neck || []).map((neck) => ({ label: neck, value: neck })));
                 } else {
                     console.log("Error fetching data:", response.message);
                 }
@@ -810,6 +834,74 @@ const TPI = ({ navigation }) => {
                             dropDownContainerStyle={styles.dropdownContainer}
                         />
 
+                        <Text style={styles.dropdownHeader}>Elevation</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={elevationtOpen}
+                            value={selectedelevation} // Should correspond to 'elevation_number'
+                            items={elevationItems} // Ensure elevationItems has a correct structure
+                            setOpen={setelevationOpen}
+                            setValue={setSelectedelevation}
+                            setItems={setelevationItems}
+                            placeholder="Select Elevation" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 350 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <Text style={styles.dropdownHeader}>WallBlower</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={wallblowertOpen}
+                            value={selectedwallblower} // Should correspond to 'wallblower_number'
+                            items={wallblowerItems} // Ensure wallblowerItems has a correct structure
+                            setOpen={
+                                setwallblowerOpen
+                            }
+                            setValue={setSelectedwallblower}
+                            setItems={setwallblowerItems}
+
+
+
+                            placeholder="Select WallBlower" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 300 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <Text style={styles.dropdownHeader}>Panel</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={panelltOpen}
+                            value={selectedpanell} // Should correspond to 'panell_number'
+                            items={panellItems} // Ensure panellItems has a correct structure
+                            setOpen={
+                                setpanellOpen
+                            }
+                            setValue={setSelectedpanell}
+                            setItems={setpanellItems}
+
+
+
+                            placeholder="Select Panel" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 250 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+                        <Text style={styles.dropdownHeader}>Neck</Text>
+                        <DropDownPicker
+                            searchable={true}
+                            open={necktOpen}
+                            value={selectedneck} // Should correspond to 'neck_number'
+                            items={neckItems} // Ensure neckItems has a correct structure
+                            setOpen={
+                                setneckOpen
+                            }
+                            setValue={setSelectedneck}
+                            setItems={setneckItems}
+
+
+
+                            placeholder="Select Neck" // Placeholder corrected
+                            style={{ ...styles.dropdown, zIndex: 350 }}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                        />
+
 
 
 
@@ -914,15 +1006,15 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalContainer: {
-        width: '90%',
+        width: '95%',
         backgroundColor: '#fff',
-        borderRadius: 15,
+        // borderRadius: 15,
         padding: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
-        elevation: 5,
+        // elevation: 5,
     },
     modalTitle: {
         fontSize: 20,

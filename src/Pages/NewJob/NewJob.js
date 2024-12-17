@@ -505,6 +505,313 @@ const NewJob = ({ navigation }) => {
     };
 
 
+    const panelSelect = async value => {
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${formData.component_name}&area=${formData.area}&coil_number=${formData.coil_number}&panel_number=${value}`,
+                true,
+            );
+            if (response.status === 'success') {
+
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                );
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
+
+            } else {
+                // Clear dropdown items if the response status isn't successful
+                clearDropdownItems();
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Clear data in case of an error
+            clearDropdownItems();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const rowSelect = async value => {
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${formData.component_name}&area=${formData.area}&coil_number=${formData.coil_number}&panel_number=${formData.panel_number}&ow_number=${value}`,
+                true,
+            );
+            console.log('rowSelect', response)
+            if (response.status === 'success') {
+
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                );
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
+
+            } else {
+                // Clear dropdown items if the response status isn't successful
+                clearDropdownItems();
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Clear data in case of an error
+            clearDropdownItems();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const elevationSelect = async value => {
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${formData.component_name}&area=${formData.area}&coil_number=${formData.coil_number}&panel_number=${formData.panel_number}&ow_number=${formData.row_number}&elevation=${value}`,
+                true,
+            );
+            console.log('elevationSelect', response)
+            if (response.status === 'success') {
+
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                );
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
+
+            } else {
+                // Clear dropdown items if the response status isn't successful
+                clearDropdownItems();
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Clear data in case of an error
+            clearDropdownItems();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const wallblowerSelect = async value => {
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${formData.component_name}&area=${formData.area}&coil_number=${formData.coil_number}&panel_number=${formData.panel_number}&ow_number=${formData.row_number}&elevation=${formData.elevation}&wall_blower=${value}`,
+                true,
+            );
+            console.log('wallblowerSelect', response)
+            if (response.status === 'success') {
+
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                );
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
+
+            } else {
+                // Clear dropdown items if the response status isn't successful
+                clearDropdownItems();
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Clear data in case of an error
+            clearDropdownItems();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const PanellSelect = async value => {
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${formData.component_name}&area=${formData.area}&coil_number=${formData.coil_number}&panel_number=${formData.panel_number}&ow_number=${formData.row_number}&elevation=${formData.elevation}&wall_blower=${formData.wall_blower}&panel=${value}`,
+                true,
+            );
+            console.log('PanellSelect', response)
+            if (response.status === 'success') {
+
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                );
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
+
+            } else {
+                // Clear dropdown items if the response status isn't successful
+                clearDropdownItems();
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Clear data in case of an error
+            clearDropdownItems();
+        } finally {
+            setLoading(false);
+        }
+    };
+    const NeckSelect = async value => {
+        try {
+            const response = await GETNETWORK(
+                `${BAS_URL}welding/jobmaster/create-job/?component_name=${formData.component_name}&area=${formData.area}&coil_number=${formData.coil_number}&panel_number=${formData.panel_number}&ow_number=${formData.row_number}&elevation=${formData.elevation}&wall_blower=${formData.wall_blower}&panel=${formData.panel}&neck=${value}`,
+                true,
+            );
+            console.log('NeckSelect', response)
+            if (response.status === 'success') {
+
+                setHangerItems(
+                    response.data.hanger_number.map(item => ({ label: item, value: item })),
+                );
+                setPanelItems(
+                    response.data.panel_number.map(item => ({ label: item, value: item })),
+                );
+                setRowItems(
+                    response.data.row_number.map(item => ({ label: item, value: item })),
+                );
+                setTubeItems(
+                    response.data.tube_number.map(item => ({ label: item, value: item })),
+                );
+                setJointItems(
+                    response.data.joint_number.map(item => ({ label: item, value: item })),
+                );
+                setPanellItems(
+                    response.data.panel.map(item => ({ label: item, value: item }))
+                )
+                setelevationItems(
+                    response.data.elevation.map(item => ({ label: item, value: item }))
+                )
+                setwallBlowerItems(
+                    response.data.wall_blower.map(item => ({ label: item, value: item }))
+                )
+                setneckItems(
+                    response.data.neck.map(item => ({ label: item, value: item }))
+                )
+
+
+            } else {
+                // Clear dropdown items if the response status isn't successful
+                clearDropdownItems();
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Clear data in case of an error
+            clearDropdownItems();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
 
 
 
@@ -603,7 +910,7 @@ const NewJob = ({ navigation }) => {
     };
 
 
-    console.log('form', formData)
+    // console.log('form', formData)
 
 
 
@@ -707,7 +1014,7 @@ const NewJob = ({ navigation }) => {
 
 
                                         <View style={styles.inputContainer}>
-                                            <Text style={styles.dropdownHeader}>Fresh/Old</Text>
+                                            <Text style={styles.dropdownHeader}>Type</Text>
                                             <DropDownPicker
                                                 searchable={true}
                                                 open={fresholdStates.fresholdOpen}
@@ -897,6 +1204,8 @@ const NewJob = ({ navigation }) => {
                                                 onSelectItem={(item) => {
                                                     handleInputChange('panel_number', item.value);
 
+                                                    panelSelect(item?.value)
+
                                                 }}
                                                 placeholder="Panel Number"
                                                 style={styles.dropdownStyle}
@@ -930,6 +1239,7 @@ const NewJob = ({ navigation }) => {
                                                 // }}
                                                 onSelectItem={(item) => {
                                                     handleInputChange('row_number', item.value);
+                                                    rowSelect(item?.value)
 
                                                 }}
                                                 placeholder="Row Number"
@@ -937,6 +1247,159 @@ const NewJob = ({ navigation }) => {
                                                 textStyle={styles.dropdownTextStyle}
                                             />
                                         </View>
+
+
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Elevation</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={elevationStates.elevationOpen}
+                                                value={formData.elevation} // Should correspond to 'elevation_number'
+                                                items={elevationItems} // Ensure elevationItems has a correct structure
+                                                setOpen={open =>
+                                                    setelevationStates(prevState => ({
+                                                        ...prevState,
+                                                        elevationOpen: open,
+                                                    }))
+                                                }
+
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('elevation', item.value);
+                                                    elevationSelect(item?.value)
+
+                                                }}
+
+
+                                                placeholder="Elevation" // Placeholder corrected
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+
+
+                                    </View>
+                                </View>
+
+                                <View style={{ ...styles.cardContainer, zIndex: 650 }}>
+                                    <View style={styles.row}>
+
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Wall Blower</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={wallBlowerStates.wallBlowerOpen}
+                                                value={formData.wall_blower} // Correct value should be 'wallBlower_number'
+                                                items={wallBlowerItems} // Ensure wallBlowerItems is structured correctly
+                                                setOpen={open =>
+                                                    setwallBlowerStates(prevState => ({
+                                                        ...prevState,
+                                                        wallBlowerOpen: open
+                                                    }))
+                                                }
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('joint_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('wall_blower', item.value);
+                                                    wallblowerSelect(item.value)
+                                                }}
+                                                placeholder="Wall blower"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Panel</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={PanellStates.PanellOpen}
+                                                value={formData.panel} // Should correspond to 'Panell_number'
+                                                items={PanellItems} // Ensure PanellItems has a correct structure
+                                                setOpen={open =>
+                                                    setPanellStates(prevState => ({
+                                                        ...prevState,
+                                                        PanellOpen: open,
+                                                    }))
+                                                }
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('tube_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('panel', item.value);
+                                                    PanellSelect(item.value);
+
+                                                }}
+
+
+                                                placeholder="Panel" // Placeholder corrected
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+
+
+
+                                    </View>
+                                </View>
+
+                                <View style={{ ...styles.cardContainer, zIndex: 600 }}>
+                                    <View style={styles.row}>
+
+                                        <View style={styles.inputContainer}>
+                                            <Text style={styles.dropdownHeader}>Neck</Text>
+                                            <DropDownPicker
+                                                searchable={true}
+                                                open={neckStates.neckOpen}
+                                                value={formData.neck} // Correct value should be 'neck_number'
+                                                items={neckItems} // Ensure neckItems is structured correctly
+                                                setOpen={open =>
+                                                    setneckStates(prevState => ({
+                                                        ...prevState,
+                                                        neckOpen: open
+                                                    }))
+                                                }
+                                                // setValue={callback => {
+                                                //     const value = callback();
+                                                //     handleInputChange('joint_number', value); // Correct field updated
+                                                // }}
+
+                                                onSelectItem={(item) => {
+                                                    handleInputChange('neck', item.value);
+                                                    NeckSelect(item.value);
+                                                }}
+                                                placeholder="Neck"
+                                                style={styles.dropdownStyle}
+                                                textStyle={styles.dropdownTextStyle}
+                                            />
+
+                                        </View>
+
+
+
+
+
+
+                                    </View>
+                                </View>
+
+
+                                <View style={{ ...styles.cardContainer, zIndex: 550 }}>
+                                    <View style={styles.row}>
+
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Tube Number</Text>
                                             <DropDownPicker
@@ -969,14 +1432,6 @@ const NewJob = ({ navigation }) => {
                                         </View>
 
 
-
-
-                                    </View>
-                                </View>
-
-                                <View style={{ ...styles.cardContainer, zIndex: 650 }}>
-                                    <View style={styles.row}>
-
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Joint Number</Text>
                                             <DropDownPicker
@@ -1004,139 +1459,6 @@ const NewJob = ({ navigation }) => {
                                             />
 
                                         </View>
-
-                                        <View style={styles.inputContainer}>
-                                            <Text style={styles.dropdownHeader}>Elevation</Text>
-                                            <DropDownPicker
-                                                searchable={true}
-                                                open={elevationStates.elevationOpen}
-                                                value={formData.elevation} // Should correspond to 'elevation_number'
-                                                items={elevationItems} // Ensure elevationItems has a correct structure
-                                                setOpen={open =>
-                                                    setelevationStates(prevState => ({
-                                                        ...prevState,
-                                                        elevationOpen: open,
-                                                    }))
-                                                }
-                                                // setValue={callback => {
-                                                //     const value = callback();
-                                                //     handleInputChange('tube_number', value); // Correct field updated
-                                                // }}
-
-                                                onSelectItem={(item) => {
-                                                    handleInputChange('elevation', item.value);
-
-                                                }}
-
-
-                                                placeholder="Elevation" // Placeholder corrected
-                                                style={styles.dropdownStyle}
-                                                textStyle={styles.dropdownTextStyle}
-                                            />
-
-                                        </View>
-
-
-
-
-                                    </View>
-                                </View>
-
-                                <View style={{ ...styles.cardContainer, zIndex: 600 }}>
-                                    <View style={styles.row}>
-
-                                        <View style={styles.inputContainer}>
-                                            <Text style={styles.dropdownHeader}>Wall Blower</Text>
-                                            <DropDownPicker
-                                                searchable={true}
-                                                open={wallBlowerStates.wallBlowerOpen}
-                                                value={formData.wall_blower} // Correct value should be 'wallBlower_number'
-                                                items={wallBlowerItems} // Ensure wallBlowerItems is structured correctly
-                                                setOpen={open =>
-                                                    setwallBlowerStates(prevState => ({
-                                                        ...prevState,
-                                                        wallBlowerOpen: open
-                                                    }))
-                                                }
-                                                // setValue={callback => {
-                                                //     const value = callback();
-                                                //     handleInputChange('joint_number', value); // Correct field updated
-                                                // }}
-
-                                                onSelectItem={(item) => {
-                                                    handleInputChange('wall_blower', item.value);
-                                                }}
-                                                placeholder="Wall blower"
-                                                style={styles.dropdownStyle}
-                                                textStyle={styles.dropdownTextStyle}
-                                            />
-
-                                        </View>
-                                        <View style={styles.inputContainer}>
-                                            <Text style={styles.dropdownHeader}>Panel</Text>
-                                            <DropDownPicker
-                                                searchable={true}
-                                                open={PanellStates.PanellOpen}
-                                                value={formData.panel} // Should correspond to 'Panell_number'
-                                                items={PanellItems} // Ensure PanellItems has a correct structure
-                                                setOpen={open =>
-                                                    setPanellStates(prevState => ({
-                                                        ...prevState,
-                                                        PanellOpen: open,
-                                                    }))
-                                                }
-                                                // setValue={callback => {
-                                                //     const value = callback();
-                                                //     handleInputChange('tube_number', value); // Correct field updated
-                                                // }}
-
-                                                onSelectItem={(item) => {
-                                                    handleInputChange('panel', item.value);
-
-                                                }}
-
-
-                                                placeholder="Panel" // Placeholder corrected
-                                                style={styles.dropdownStyle}
-                                                textStyle={styles.dropdownTextStyle}
-                                            />
-
-                                        </View>
-
-
-
-                                    </View>
-                                </View>
-
-
-                                <View style={{ ...styles.cardContainer, zIndex: 550 }}>
-
-                                    <View style={styles.inputContainer}>
-                                        <Text style={styles.dropdownHeader}>Neck</Text>
-                                        <DropDownPicker
-                                            searchable={true}
-                                            open={neckStates.neckOpen}
-                                            value={formData.neck} // Correct value should be 'neck_number'
-                                            items={neckItems} // Ensure neckItems is structured correctly
-                                            setOpen={open =>
-                                                setneckStates(prevState => ({
-                                                    ...prevState,
-                                                    neckOpen: open
-                                                }))
-                                            }
-                                            // setValue={callback => {
-                                            //     const value = callback();
-                                            //     handleInputChange('joint_number', value); // Correct field updated
-                                            // }}
-
-                                            onSelectItem={(item) => {
-                                                handleInputChange('neck', item.value);
-                                            }}
-                                            placeholder="Neck"
-                                            style={styles.dropdownStyle}
-                                            textStyle={styles.dropdownTextStyle}
-                                        />
-
                                     </View>
 
                                 </View>

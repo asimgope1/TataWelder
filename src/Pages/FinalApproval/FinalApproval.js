@@ -107,6 +107,26 @@ const FinalApproval = ({ navigation }) => {
     const [selectedWelder, setSelectedWelder] = useState(null);
     const [welderOpen, setWelderOpen] = useState(false);
 
+
+    const [elevationItems, setelevationItems] = useState([]);
+    const [selectedelevation, setSelectedelevation] = useState(null);
+    const [elevationtOpen, setelevationOpen] = useState(false);
+
+    const [wallblowerItems, setwallblowerItems] = useState([]);
+    const [selectedwallblower, setSelectedwallblower] = useState(null);
+    const [wallblowertOpen, setwallblowerOpen] = useState(false);
+
+
+    const [panellItems, setpanellItems] = useState([]);
+    const [selectedpanell, setSelectedpanell] = useState(null);
+    const [panelltOpen, setpanellOpen] = useState(false);
+
+
+    const [neckItems, setneckItems] = useState([]);
+    const [selectedneck, setSelectedneck] = useState(null);
+    const [necktOpen, setneckOpen] = useState(false);
+
+
     // Fetch data when the component mounts
     useEffect(() => {
         const fetchData = async () => {
@@ -125,7 +145,12 @@ const FinalApproval = ({ navigation }) => {
                     setRowItems(response.data.row_number.map((row) => ({ label: row, value: row })));
                     setTubeItems(response.data.tube_number.map((tube) => ({ label: tube, value: tube })));
                     setJointItems(response.data.joint_number.map((joint) => ({ label: joint, value: joint })));
-                    setwelderItems(response.data.welders.map(([id, name]) => ({ label: name, value: id })));
+                    setelevationItems(response.data.elevation.map((elevation) => ({ label: elevation, value: elevation })));
+                    setwallblowerItems(response.data.wall_blower.map((wallblower) => ({ label: wallblower, value: wallblower })));
+
+                    // Panel and Neck items
+                    setpanellItems((response.data.panel || []).map((panel) => ({ label: panel, value: panel })));
+                    setneckItems((response.data.neck || []).map((neck) => ({ label: neck, value: neck })));
                 } else {
                     console.log("Error fetching data:", response.message);
                 }
@@ -475,182 +500,254 @@ const FinalApproval = ({ navigation }) => {
             >
                 <View style={styles.modalBackdrop}>
                     <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Filter</Text>
+
+                        <ScrollView contentContainerStyle={styles.modalContainer} >
+                            <Text style={styles.modalTitle}>Filter</Text>
 
 
 
 
-                        <DropDownPicker
-                            searchable={true}
-                            open={unitOpen}
-                            value={selectedUnit}
-                            items={unitItems}
-                            setOpen={setUnitOpen}
-                            setValue={setSelectedUnit}
-                            setItems={setUnitItems}
-                            placeholder="Select Unit"
-                            style={{ ...styles.dropdown, zIndex: 1200 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
+                            <DropDownPicker
+                                searchable={true}
+                                open={unitOpen}
+                                value={selectedUnit}
+                                items={unitItems}
+                                setOpen={setUnitOpen}
+                                setValue={setSelectedUnit}
+                                setItems={setUnitItems}
+                                placeholder="Select Unit"
+                                style={{ ...styles.dropdown, zIndex: 1200 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
 
 
 
-                        <DropDownPicker
-                            searchable={true}
-                            open={componentOpen}
-                            value={selectedComponent}
-                            items={componentItems}
-                            setOpen={setComponentOpen}
-                            setValue={setSelectedComponent}
-                            setItems={setComponentItems}
-                            placeholder="Select Component"
-                            style={{ ...styles.dropdown, zIndex: 1100 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
+                            <DropDownPicker
+                                searchable={true}
+                                open={componentOpen}
+                                value={selectedComponent}
+                                items={componentItems}
+                                setOpen={setComponentOpen}
+                                setValue={setSelectedComponent}
+                                setItems={setComponentItems}
+                                placeholder="Select Component"
+                                style={{ ...styles.dropdown, zIndex: 1100 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
 
-                        {/* Area Dropdown */}
-                        <DropDownPicker
-                            searchable={true}
-                            open={areaOpen}
-                            value={selectedArea}
-                            items={areaItems}
-                            setOpen={setAreaOpen}
-                            setValue={setSelectedArea}
-                            setItems={setAreaItems}
-                            placeholder="Select Area"
-                            style={{ ...styles.dropdown, zIndex: 1000 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
+                            {/* Area Dropdown */}
+                            <DropDownPicker
+                                searchable={true}
+                                open={areaOpen}
+                                value={selectedArea}
+                                items={areaItems}
+                                setOpen={setAreaOpen}
+                                setValue={setSelectedArea}
+                                setItems={setAreaItems}
+                                placeholder="Select Area"
+                                style={{ ...styles.dropdown, zIndex: 1000 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
 
-                        {/* Hanger Dropdown */}
-                        <DropDownPicker
-                            searchable={true}
-                            open={hangerOpen}
-                            value={selectedHanger}
-                            items={hangerItems}
-                            setOpen={setHangerOpen}
-                            setValue={setSelectedHanger}
-                            setItems={setHangerItems}
-                            placeholder="Select Hanger"
-                            style={{ ...styles.dropdown, zIndex: 900 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={coilOpen}
-                            value={selectedCoil}
-                            items={coilItems}
-                            setOpen={setCoilOpen}
-                            setValue={setSelectedCoil}
-                            setItems={setCoilItems}
-                            placeholder="Select Coil"
-                            style={{ ...styles.dropdown, zIndex: 800 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={panelOpen}
-                            value={selectedPanel}
-                            items={panelItems}
-                            setOpen={setPanelOpen}
-                            setValue={setSelectedPanel}
-                            setItems={setPanelItems}
-                            placeholder="Select Panel"
-                            style={{ ...styles.dropdown, zIndex: 700 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={rowOpen}
-                            value={selectedRow}
-                            items={rowItems}
-                            setOpen={setRowOpen}
-                            setValue={setSelectedRow}
-                            setItems={setRowItems}
-                            placeholder="Select Row"
-                            style={{ ...styles.dropdown, zIndex: 600 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
+                            {/* Hanger Dropdown */}
+                            <DropDownPicker
+                                searchable={true}
+                                open={hangerOpen}
+                                value={selectedHanger}
+                                items={hangerItems}
+                                setOpen={setHangerOpen}
+                                setValue={setSelectedHanger}
+                                setItems={setHangerItems}
+                                placeholder="Select Hanger"
+                                style={{ ...styles.dropdown, zIndex: 900 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <DropDownPicker
+                                searchable={true}
+                                open={coilOpen}
+                                value={selectedCoil}
+                                items={coilItems}
+                                setOpen={setCoilOpen}
+                                setValue={setSelectedCoil}
+                                setItems={setCoilItems}
+                                placeholder="Select Coil"
+                                style={{ ...styles.dropdown, zIndex: 800 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <DropDownPicker
+                                searchable={true}
+                                open={panelOpen}
+                                value={selectedPanel}
+                                items={panelItems}
+                                setOpen={setPanelOpen}
+                                setValue={setSelectedPanel}
+                                setItems={setPanelItems}
+                                placeholder="Select Panel"
+                                style={{ ...styles.dropdown, zIndex: 700 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <DropDownPicker
+                                searchable={true}
+                                open={rowOpen}
+                                value={selectedRow}
+                                items={rowItems}
+                                setOpen={setRowOpen}
+                                setValue={setSelectedRow}
+                                setItems={setRowItems}
+                                placeholder="Select Row"
+                                style={{ ...styles.dropdown, zIndex: 600 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
 
-                        <DropDownPicker
-                            searchable={true}
-                            open={tubeOpen}
-                            value={selectedTube}
-                            items={tubeItems}
-                            setOpen={setTubeOpen}
-                            setValue={setSelectedTube}
-                            setItems={setTubeItems}
-                            placeholder="Select Tube"
-                            style={{ ...styles.dropdown, zIndex: 500 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={jointOpen}
-                            value={selectedJoint}
-                            items={jointItems}
-                            setOpen={setJointOpen}
-                            setValue={setSelectedJoint}
-                            setItems={setJointItems}
-                            placeholder="Select Joint"
-                            style={{ ...styles.dropdown, zIndex: 400 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-                        <DropDownPicker
-                            searchable={true}
-                            open={welderOpen}
-                            value={selectedWelder}
-                            items={welderItems}
-                            setOpen={setWelderOpen}
-                            setValue={setSelectedWelder}
-                            setItems={setwelderItems}
-                            placeholder="Select welder"
-                            style={{ ...styles.dropdown, zIndex: 300 }}
-                            dropDownContainerStyle={styles.dropdownContainer}
-                        />
-
-                        {/* Buttons */}
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                width: '100%',
-                                justifyContent: 'space-evenly',
-                            }}
-                        >
+                            <DropDownPicker
+                                searchable={true}
+                                open={tubeOpen}
+                                value={selectedTube}
+                                items={tubeItems}
+                                setOpen={setTubeOpen}
+                                setValue={setSelectedTube}
+                                setItems={setTubeItems}
+                                placeholder="Select Tube"
+                                style={{ ...styles.dropdown, zIndex: 500 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <DropDownPicker
+                                searchable={true}
+                                open={jointOpen}
+                                value={selectedJoint}
+                                items={jointItems}
+                                setOpen={setJointOpen}
+                                setValue={setSelectedJoint}
+                                setItems={setJointItems}
+                                placeholder="Select Joint"
+                                style={{ ...styles.dropdown, zIndex: 400 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <DropDownPicker
+                                searchable={true}
+                                open={welderOpen}
+                                value={selectedWelder}
+                                items={welderItems}
+                                setOpen={setWelderOpen}
+                                setValue={setSelectedWelder}
+                                setItems={setwelderItems}
+                                placeholder="Select welder"
+                                style={{ ...styles.dropdown, zIndex: 300 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
 
 
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, styles.cancelButton]}
-                                    onPress={() => setfilterModalVisible(false)}
-                                >
-                                    <Text style={styles.buttonText}>Cancel</Text>
-                                </TouchableOpacity>
+                            <Text style={styles.dropdownHeader}>Elevation</Text>
+                            <DropDownPicker
+                                searchable={true}
+                                open={elevationtOpen}
+                                value={selectedelevation} // Should correspond to 'elevation_number'
+                                items={elevationItems} // Ensure elevationItems has a correct structure
+                                setOpen={setelevationOpen}
+                                setValue={setSelectedelevation}
+                                setItems={setelevationItems}
+                                placeholder="Select Elevation" // Placeholder corrected
+                                style={{ ...styles.dropdown, zIndex: 350 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <Text style={styles.dropdownHeader}>WallBlower</Text>
+                            <DropDownPicker
+                                searchable={true}
+                                open={wallblowertOpen}
+                                value={selectedwallblower} // Should correspond to 'wallblower_number'
+                                items={wallblowerItems} // Ensure wallblowerItems has a correct structure
+                                setOpen={
+                                    setwallblowerOpen
+                                }
+                                setValue={setSelectedwallblower}
+                                setItems={setwallblowerItems}
+
+
+
+                                placeholder="Select WallBlower" // Placeholder corrected
+                                style={{ ...styles.dropdown, zIndex: 300 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <Text style={styles.dropdownHeader}>Panel</Text>
+                            <DropDownPicker
+                                searchable={true}
+                                open={panelltOpen}
+                                value={selectedpanell} // Should correspond to 'panell_number'
+                                items={panellItems} // Ensure panellItems has a correct structure
+                                setOpen={
+                                    setpanellOpen
+                                }
+                                setValue={setSelectedpanell}
+                                setItems={setpanellItems}
+
+
+
+                                placeholder="Select Panel" // Placeholder corrected
+                                style={{ ...styles.dropdown, zIndex: 250 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+                            <Text style={styles.dropdownHeader}>Neck</Text>
+                            <DropDownPicker
+                                searchable={true}
+                                open={necktOpen}
+                                value={selectedneck} // Should correspond to 'neck_number'
+                                items={neckItems} // Ensure neckItems has a correct structure
+                                setOpen={
+                                    setneckOpen
+                                }
+                                setValue={setSelectedneck}
+                                setItems={setneckItems}
+
+
+
+                                placeholder="Select Neck" // Placeholder corrected
+                                style={{ ...styles.dropdown, zIndex: 350 }}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                            />
+
+                            {/* Buttons */}
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    width: '100%',
+                                    justifyContent: 'space-evenly',
+                                }}
+                            >
+
+
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity
+                                        style={[styles.actionButton, styles.cancelButton]}
+                                        onPress={() => setfilterModalVisible(false)}
+                                    >
+                                        <Text style={styles.buttonText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity
+                                        style={[styles.actionButton, styles.submitButton]}
+                                        onPress={() => {
+                                            const criteria = [
+                                                selectedComponent,
+                                                selectedArea,
+                                                selectedHanger,
+                                                selectedCoil,
+                                                selectedPanel,
+                                                selectedRow,
+                                            ]
+                                                .filter(Boolean) // Remove any null or undefined values
+                                                .join(', '); // Join them with a comma for better readability
+
+                                            setFilterCriteria(criteria); // Set the concatenated string
+                                            setfilterModalVisible(false);
+                                        }}
+
+                                    >
+                                        <Text style={styles.buttonText}>Submit</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, styles.submitButton]}
-                                    onPress={() => {
-                                        const criteria = [
-                                            selectedComponent,
-                                            selectedArea,
-                                            selectedHanger,
-                                            selectedCoil,
-                                            selectedPanel,
-                                            selectedRow,
-                                        ]
-                                            .filter(Boolean) // Remove any null or undefined values
-                                            .join(', '); // Join them with a comma for better readability
-
-                                        setFilterCriteria(criteria); // Set the concatenated string
-                                        setfilterModalVisible(false);
-                                    }}
-
-                                >
-                                    <Text style={styles.buttonText}>Submit</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        </ScrollView>
                     </View>
                 </View>
             </Modal>

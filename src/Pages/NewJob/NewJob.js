@@ -1072,7 +1072,17 @@ const NewJob = ({ navigation }) => {
                                         <View style={styles.inputContainer}>
                                             <Text style={styles.dropdownHeader}>Component</Text>
                                             <DropDownPicker
+                                                scrollViewProps={
+                                                    {
+                                                        contentContainerStyle: {
+                                                            maxHeight: '300px',
+                                                            overflow: 'auto',
+                                                        },
+                                                        //    ...scrollViewProps,
+                                                    }
+                                                }
                                                 searchable={true}
+                                                autoScroll={true}
                                                 open={componentStates.componentOpen}
                                                 value={formData.component_name}
                                                 items={componentItems}
